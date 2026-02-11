@@ -147,7 +147,15 @@
 }
 
 .header-dropdown-menu {
-    @apply absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 opacity-0 invisible transition-all duration-200 transform translate-y-2;
+    @apply absolute mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 opacity-0 invisible transition-all duration-200 transform translate-y-2;
+}
+
+.header-dropdown:first-child .header-dropdown-menu {
+    @apply left-0;
+}
+
+.header-dropdown:last-child .header-dropdown-menu {
+    @apply right-0;
 }
 
 .header-dropdown:hover .header-dropdown-menu {
