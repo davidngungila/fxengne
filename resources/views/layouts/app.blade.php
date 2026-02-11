@@ -274,17 +274,75 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
                     </button>
-                    
-                    <!-- User Section (Left Side) -->
+                    <h1 class="text-xl font-semibold text-gray-900">@yield('page-title', 'Dashboard')</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
                     <div class="relative header-dropdown">
-                        <button class="flex items-center space-x-3 pr-4 border-r border-gray-200 header-dropdown-toggle">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <span class="text-white font-semibold text-sm">{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</span>
+                        <button class="relative p-2 text-gray-500 hover:text-gray-700 header-dropdown-toggle">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+                        <div class="header-dropdown-menu">
+                            <div class="px-4 py-3 border-b border-gray-200">
+                                <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
                             </div>
+                            <div class="max-h-96 overflow-y-auto">
+                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900">New Trade Executed</p>
+                                            <p class="text-xs text-gray-500 mt-1">EURUSD BUY order opened at 1.0850</p>
+                                            <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900">Take Profit Hit</p>
+                                            <p class="text-xs text-gray-500 mt-1">GBPUSD trade closed with +$150 profit</p>
+                                            <p class="text-xs text-gray-400 mt-1">15 minutes ago</p>
+                                        </div>
+                                    </div>
+                                </a>
+                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900">Risk Limit Warning</p>
+                                            <p class="text-xs text-gray-500 mt-1">Daily loss limit at 80%</p>
+                                            <p class="text-xs text-gray-400 mt-1">1 hour ago</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="px-4 py-2 border-t border-gray-200 bg-gray-50">
+                                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View all notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Section -->
+                    <div class="relative header-dropdown">
+                        <button class="flex items-center space-x-3 pl-4 border-l border-gray-200 header-dropdown-toggle">
                             <div class="text-left">
                                 <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name ?? 'User' }}</p>
                                 <p class="text-xs text-gray-500">{{ auth()->user()->email ?? 'user@example.com' }}</p>
                                 <p class="text-xs text-blue-600 font-medium mt-0.5">{{ auth()->user()->role ?? 'Trader' }}</p>
+                            </div>
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <span class="text-white font-semibold text-sm">{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</span>
                             </div>
                         </button>
                         <div class="header-dropdown-menu">
@@ -344,65 +402,6 @@
                                         <span>Sign Out</span>
                                     </div>
                                 </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <h1 class="text-xl font-semibold text-gray-900">@yield('page-title', 'Dashboard')</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Notifications -->
-                    <div class="relative header-dropdown">
-                        <button class="relative p-2 text-gray-500 hover:text-gray-700 header-dropdown-toggle">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                            </svg>
-                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
-                        </button>
-                        <div class="header-dropdown-menu">
-                            <div class="px-4 py-3 border-b border-gray-200">
-                                <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
-                            </div>
-                            <div class="max-h-96 overflow-y-auto">
-                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900">New Trade Executed</p>
-                                            <p class="text-xs text-gray-500 mt-1">EURUSD BUY order opened at 1.0850</p>
-                                            <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900">Take Profit Hit</p>
-                                            <p class="text-xs text-gray-500 mt-1">GBPUSD trade closed with +$150 profit</p>
-                                            <p class="text-xs text-gray-400 mt-1">15 minutes ago</p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900">Risk Limit Warning</p>
-                                            <p class="text-xs text-gray-500 mt-1">Daily loss limit at 80%</p>
-                                            <p class="text-xs text-gray-400 mt-1">1 hour ago</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="px-4 py-2 border-t border-gray-200 bg-gray-50">
-                                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View all notifications</a>
                             </div>
                         </div>
                     </div>
