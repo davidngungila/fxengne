@@ -64,7 +64,18 @@ class TwoFactorService
             // Verify with a window of 8 (allows for clock skew of ±4 minutes)
             // Window parameter: checks current time step ± window steps
             // Each time step is 30 seconds, so window of 8 = ±4 minutes
+            // The verifyKey method signature: verifyKey($secret, $key, $window = null, $timestamp = null)
             $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 8);
+            
+            if (!$verified) {
+                // Try with window of 4 as fallback
+                $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 4);
+            }
+            
+            if (!$verified) {
+                // Try with window of 2 as last fallback
+                $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 2);
+            }
             
             if (!$verified) {
                 \Log::warning('2FA Verification Failed: Code mismatch', [
@@ -73,7 +84,8 @@ class TwoFactorService
                     'code' => $code,
                     'secret_length' => strlen($user->two_factor_secret),
                     'secret_preview' => substr($user->two_factor_secret, 0, 10) . '...',
-                    'timestamp' => time()
+                    'timestamp' => time(),
+                    'server_time' => now()->toDateTimeString()
                 ]);
             } else {
                 \Log::info('2FA Verification Success', [
@@ -89,7 +101,8 @@ class TwoFactorService
                 'error' => $e->getMessage(),
                 'code' => $code,
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
             return false;
         }
