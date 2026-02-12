@@ -106,6 +106,42 @@ class TwoFactorController extends Controller
     }
 
     /**
+     * Download recovery codes as text file
+     */
+    public function downloadRecoveryCodes()
+    {
+        $user = Auth::user();
+        
+        if (!$user->hasTwoFactorEnabled()) {
+            return redirect()->route('profile.security');
+        }
+
+        $recoveryCodes = $user->getRecoveryCodes();
+        $filename = 'fxengne-recovery-codes-' . date('Y-m-d') . '.txt';
+        
+        $content = "FxEngne - Two-Factor Authentication Recovery Codes\n";
+        $content .= "==================================================\n\n";
+        $content .= "Account: " . $user->email . "\n";
+        $content .= "Generated: " . now()->format('Y-m-d H:i:s') . "\n\n";
+        $content .= "IMPORTANT: Store these codes in a safe place.\n";
+        $content .= "Each code can only be used once.\n\n";
+        $content .= "Recovery Codes:\n";
+        $content .= "---------------\n";
+        
+        foreach ($recoveryCodes as $index => $code) {
+            $content .= ($index + 1) . ". " . $code . "\n";
+        }
+        
+        $content .= "\n\n";
+        $content .= "If you lose access to your authenticator device, use one of these codes to sign in.\n";
+        $content .= "After using a recovery code, it cannot be used again.\n";
+
+        return response($content)
+            ->header('Content-Type', 'text/plain')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    /**
      * Disable 2FA
      */
     public function disable(Request $request)

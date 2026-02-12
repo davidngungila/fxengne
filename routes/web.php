@@ -36,6 +36,7 @@ Route::middleware(['auth'])->prefix('auth/two-factor')->name('auth.two-factor.')
     Route::get('/verify', [\App\Http\Controllers\Auth\TwoFactorController::class, 'showVerification'])->name('verify');
     Route::post('/verify', [\App\Http\Controllers\Auth\TwoFactorController::class, 'verify'])->name('verify');
     Route::get('/recovery-codes', [\App\Http\Controllers\Auth\TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes');
+    Route::get('/recovery-codes/download', [\App\Http\Controllers\Auth\TwoFactorController::class, 'downloadRecoveryCodes'])->name('recovery-codes.download');
     Route::post('/recovery-codes/regenerate', [\App\Http\Controllers\Auth\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('recovery-codes.regenerate');
     Route::post('/disable', [\App\Http\Controllers\Auth\TwoFactorController::class, 'disable'])->name('disable');
 });
