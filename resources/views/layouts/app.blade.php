@@ -551,6 +551,13 @@
                     <!-- User Section -->
                     <div class="relative header-dropdown">
                         <button class="flex items-center space-x-3 pl-4 border-l border-gray-200 header-dropdown-toggle">
+                            @if(auth()->user()->profile_image)
+                                <img src="{{ auth()->user()->getProfileImageUrl() }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200 flex-shrink-0">
+                            @else
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span class="text-white font-semibold text-sm">{{ auth()->user()->getAvatarInitial() }}</span>
+                                </div>
+                            @endif
                             <div class="text-left">
                                 <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name ?? 'User' }}</p>
                                 <p class="text-xs text-gray-500">{{ auth()->user()->email ?? 'user@example.com' }}</p>
@@ -558,13 +565,6 @@
                                     {{ ucfirst(auth()->user()->role ?? 'Trader') }}
                                 </p>
                             </div>
-                            @if(auth()->user()->profile_image)
-                                <img src="{{ auth()->user()->getProfileImageUrl() }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
-                            @else
-                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                    <span class="text-white font-semibold text-sm">{{ auth()->user()->getAvatarInitial() }}</span>
-                                </div>
-                            @endif
                         </button>
                         <div class="header-dropdown-menu">
                             <div class="px-4 py-3 border-b border-gray-200">

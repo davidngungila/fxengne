@@ -42,9 +42,9 @@
                             </svg>
                         </div>
                     </div>
-                    <form id="profileImageForm" action="{{ route('profile.upload-image') }}" method="POST" enctype="multipart/form-data" class="hidden">
+                    <form id="profileImageForm" action="{{ route('profile.upload-image') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <input type="file" id="profileImageInput" name="profile_image" accept="image/jpeg,image/png,image/jpg,image/gif" onchange="uploadImage()">
+                        <input type="file" id="profileImageInput" name="profile_image" accept="image/jpeg,image/png,image/jpg,image/gif" class="hidden" onchange="uploadImage()">
                     </form>
                     <div class="flex flex-col space-y-2 w-full">
                         <button onclick="document.getElementById('profileImageInput').click()" class="btn btn-primary w-full text-sm">
@@ -115,6 +115,7 @@ function uploadImage() {
         // Validate file size (2MB)
         if (fileInput.files[0].size > 2048 * 1024) {
             alert('File size must be less than 2MB');
+            fileInput.value = '';
             return;
         }
         
@@ -122,17 +123,19 @@ function uploadImage() {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
         if (!allowedTypes.includes(fileInput.files[0].type)) {
             alert('Please select a valid image file (JPG, PNG, or GIF)');
+            fileInput.value = '';
             return;
         }
         
         // Show loading state
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
+        const uploadBtn = document.querySelector('button[onclick*="profileImageInput"]');
+        if (uploadBtn) {
+            const originalText = uploadBtn.innerHTML;
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Uploading...';
         }
         
-        // Submit form
+        // Submit form immediately
         form.submit();
     }
 }
@@ -142,9 +145,11 @@ document.getElementById('profileImageInput')?.addEventListener('change', functio
     if (e.target.files && e.target.files[0]) {
         const reader = new FileReader();
         reader.onload = function(event) {
-            // Optional: Show preview
-            // const preview = document.querySelector('.profile-preview');
-            // if (preview) preview.src = event.target.result;
+            // Show preview immediately
+            const preview = document.querySelector('img[alt*="{{ auth()->user()->name }}"]');
+            if (preview) {
+                preview.src = event.target.result;
+            }
         };
         reader.readAsDataURL(e.target.files[0]);
     }
