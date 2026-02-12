@@ -44,6 +44,7 @@ class TwoFactorService
     public function verify(User $user, string $code): bool
     {
         if (!$user->two_factor_secret) {
+            \Log::error('2FA Verification Failed: No secret found for user', ['user_id' => $user->id]);
             return false;
         }
 
@@ -51,12 +52,47 @@ class TwoFactorService
         $code = trim($code);
         
         if (strlen($code) !== 6 || !ctype_digit($code)) {
+            \Log::error('2FA Verification Failed: Invalid code format', [
+                'user_id' => $user->id,
+                'code_length' => strlen($code),
+                'code' => $code
+            ]);
             return false;
         }
 
-        // Verify with a window of 2 (allows for clock skew of ±60 seconds)
-        // This checks the current time step and ±2 time steps (each step is 30 seconds)
-        return $this->google2fa->verifyKey($user->two_factor_secret, $code, 2);
+        try {
+            // Get the current timestamp
+            $timestamp = $this->google2fa->getTimestamp();
+            
+            // Verify with a window of 4 (allows for clock skew of ±2 minutes)
+            // Window of 4 means ±2 time steps (each step is 30 seconds)
+            // This accounts for server time differences and user device clock drift
+            $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 4, $timestamp);
+            
+            if (!$verified) {
+                // Try with a larger window as fallback
+                $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 8, $timestamp);
+            }
+            
+            if (!$verified) {
+                \Log::warning('2FA Verification Failed: Code mismatch', [
+                    'user_id' => $user->id,
+                    'code' => $code,
+                    'secret_length' => strlen($user->two_factor_secret),
+                    'secret_preview' => substr($user->two_factor_secret, 0, 10) . '...'
+                ]);
+            }
+            
+            return $verified;
+        } catch (\Exception $e) {
+            \Log::error('2FA Verification Exception', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'code' => $code,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
     }
 
     /**

@@ -195,8 +195,14 @@ class TwoFactorController extends Controller
 
         $user = Auth::user();
 
-        // Trim the code
+        // Trim the code and remove any spaces
         $code = trim($request->code);
+        $code = str_replace(' ', '', $code);
+
+        // Check if user has 2FA enabled
+        if (!$user->hasTwoFactorEnabled()) {
+            return back()->withErrors(['code' => 'Two-factor authentication is not enabled for your account.']);
+        }
 
         // Try recovery code first (they're longer and contain dashes)
         if (strlen($code) > 6 && strpos($code, '-') !== false) {
@@ -209,11 +215,20 @@ class TwoFactorController extends Controller
         }
 
         // Try verification code (6 digits)
-        if ($this->twoFactorService->verify($user, $code)) {
-            session()->forget('two_factor_required');
-            session(['two_factor_verified' => true]);
-            return redirect()->intended(route('dashboard.index'));
+        if (strlen($code) === 6 && ctype_digit($code)) {
+            if ($this->twoFactorService->verify($user, $code)) {
+                session()->forget('two_factor_required');
+                session(['two_factor_verified' => true]);
+                return redirect()->intended(route('dashboard.index'));
+            }
         }
+
+        \Log::warning('2FA Verification Failed', [
+            'user_id' => $user->id,
+            'code_length' => strlen($code),
+            'has_secret' => !empty($user->two_factor_secret),
+            'secret_length' => $user->two_factor_secret ? strlen($user->two_factor_secret) : 0
+        ]);
 
         return back()->withErrors(['code' => 'Invalid verification code. Please check your authenticator app and try again.']);
     }
