@@ -36,6 +36,19 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             
+            $user = Auth::user();
+            
+            // Check if 2FA is enabled
+            if ($user->hasTwoFactorEnabled()) {
+                session(['two_factor_required' => true]);
+                session()->forget('two_factor_verified');
+                
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('auth.two-factor.verify')
+                ]);
+            }
+            
             return response()->json([
                 'success' => true,
                 'redirect' => route('dashboard.index')

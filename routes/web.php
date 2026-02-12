@@ -29,8 +29,19 @@ Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLo
 Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login');
 Route::post('/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
+// Two-Factor Authentication Routes
+Route::middleware(['auth'])->prefix('auth/two-factor')->name('auth.two-factor.')->group(function () {
+    Route::get('/setup', [\App\Http\Controllers\Auth\TwoFactorController::class, 'showSetup'])->name('setup');
+    Route::post('/enable', [\App\Http\Controllers\Auth\TwoFactorController::class, 'enable'])->name('enable');
+    Route::get('/verify', [\App\Http\Controllers\Auth\TwoFactorController::class, 'showVerification'])->name('verify');
+    Route::post('/verify', [\App\Http\Controllers\Auth\TwoFactorController::class, 'verify'])->name('verify');
+    Route::get('/recovery-codes', [\App\Http\Controllers\Auth\TwoFactorController::class, 'showRecoveryCodes'])->name('recovery-codes');
+    Route::post('/recovery-codes/regenerate', [\App\Http\Controllers\Auth\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('recovery-codes.regenerate');
+    Route::post('/disable', [\App\Http\Controllers\Auth\TwoFactorController::class, 'disable'])->name('disable');
+});
+
 // Protected Routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', '2fa'])->group(function () {
     // Dashboard
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
@@ -121,6 +132,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('index');
         Route::get('/settings', [ProfileController::class, 'settings'])->name('settings');
         Route::get('/security', [ProfileController::class, 'security'])->name('security');
+        Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('change-password');
         Route::get('/notifications', [ProfileController::class, 'notifications'])->name('notifications');
         Route::get('/logs', [ProfileController::class, 'logs'])->name('logs');
     });
