@@ -134,6 +134,8 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/settings', [ProfileController::class, 'settings'])->name('settings');
         Route::get('/security', [ProfileController::class, 'security'])->name('security');
         Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('change-password');
+        Route::post('/upload-image', [ProfileController::class, 'uploadProfileImage'])->name('upload-image');
+        Route::post('/remove-image', [ProfileController::class, 'removeProfileImage'])->name('remove-image');
         Route::get('/notifications', [ProfileController::class, 'notifications'])->name('notifications');
         Route::get('/logs', [ProfileController::class, 'logs'])->name('logs');
     });

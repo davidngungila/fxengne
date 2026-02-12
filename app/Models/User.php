@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'profile_image',
         'two_factor_secret',
         'two_factor_recovery_codes',
         'two_factor_confirmed_at',
@@ -92,5 +93,24 @@ class User extends Authenticatable
     public function getRecoveryCodes(): array
     {
         return $this->two_factor_recovery_codes ?? [];
+    }
+
+    /**
+     * Get profile image URL
+     */
+    public function getProfileImageUrl(): string
+    {
+        if ($this->profile_image) {
+            return asset('storage/profile_images/' . $this->profile_image);
+        }
+        return '';
+    }
+
+    /**
+     * Get avatar initial
+     */
+    public function getAvatarInitial(): string
+    {
+        return strtoupper(substr($this->name ?? 'U', 0, 1));
     }
 }

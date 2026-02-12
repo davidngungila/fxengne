@@ -52,6 +52,49 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Password updated successfully');
     }
+
+    /**
+     * Upload profile image
+     */
+    public function uploadProfileImage(Request $request)
+    {
+        $request->validate([
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = auth()->user();
+
+        // Delete old image if exists
+        if ($user->profile_image && \Storage::disk('public')->exists('profile_images/' . $user->profile_image)) {
+            \Storage::disk('public')->delete('profile_images/' . $user->profile_image);
+        }
+
+        // Store new image
+        $imageName = time() . '_' . $user->id . '.' . $request->file('profile_image')->getClientOriginalExtension();
+        $request->file('profile_image')->storeAs('profile_images', $imageName, 'public');
+
+        $user->profile_image = $imageName;
+        $user->save();
+
+        return back()->with('success', 'Profile image updated successfully');
+    }
+
+    /**
+     * Remove profile image
+     */
+    public function removeProfileImage()
+    {
+        $user = auth()->user();
+
+        if ($user->profile_image && \Storage::disk('public')->exists('profile_images/' . $user->profile_image)) {
+            \Storage::disk('public')->delete('profile_images/' . $user->profile_image);
+        }
+
+        $user->profile_image = null;
+        $user->save();
+
+        return back()->with('success', 'Profile image removed successfully');
+    }
 }
 
 

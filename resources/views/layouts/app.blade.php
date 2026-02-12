@@ -558,14 +558,29 @@
                                     {{ ucfirst(auth()->user()->role ?? 'Trader') }}
                                 </p>
                             </div>
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <span class="text-white font-semibold text-sm">{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</span>
-                            </div>
+                            @if(auth()->user()->profile_image)
+                                <img src="{{ auth()->user()->getProfileImageUrl() }}" alt="{{ auth()->user()->name }}" class="w-10 h-10 rounded-full object-cover border-2 border-gray-200">
+                            @else
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold text-sm">{{ auth()->user()->getAvatarInitial() }}</span>
+                                </div>
+                            @endif
                         </button>
                         <div class="header-dropdown-menu">
                             <div class="px-4 py-3 border-b border-gray-200">
-                                <p class="text-sm font-semibold text-gray-900">{{ auth()->user()->name ?? 'User' }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ auth()->user()->email ?? 'user@example.com' }}</p>
+                                <div class="flex items-center space-x-3">
+                                    @if(auth()->user()->profile_image)
+                                        <img src="{{ auth()->user()->getProfileImageUrl() }}" alt="{{ auth()->user()->name }}" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
+                                    @else
+                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-semibold text-base">{{ auth()->user()->getAvatarInitial() }}</span>
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">{{ auth()->user()->name ?? 'User' }}</p>
+                                        <p class="text-xs text-gray-500 mt-1">{{ auth()->user()->email ?? 'user@example.com' }}</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="py-2">
                                 <a href="{{ route('profile.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
