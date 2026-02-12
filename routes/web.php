@@ -12,6 +12,9 @@ use App\Http\Controllers\BacktestingController;
 use App\Http\Controllers\BrokerController;
 use App\Http\Controllers\MarketToolsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Api\MarketDataController;
+use App\Http\Controllers\Api\TradeController;
+use App\Http\Controllers\AutomatedTradingController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard.index');
@@ -96,6 +99,7 @@ Route::prefix('broker')->name('broker.')->group(function () {
 // Market Tools
 Route::prefix('market-tools')->name('market-tools.')->group(function () {
     Route::get('/', [MarketToolsController::class, 'index'])->name('index');
+    Route::get('/live-market', [MarketToolsController::class, 'liveMarket'])->name('live-market');
     Route::get('/economic-calendar', [MarketToolsController::class, 'economicCalendar'])->name('economic-calendar');
     Route::get('/spread-monitor', [MarketToolsController::class, 'spreadMonitor'])->name('spread-monitor');
     Route::get('/trading-sessions', [MarketToolsController::class, 'tradingSessions'])->name('trading-sessions');
@@ -108,4 +112,37 @@ Route::prefix('profile')->name('profile.')->group(function () {
     Route::get('/security', [ProfileController::class, 'security'])->name('security');
     Route::get('/notifications', [ProfileController::class, 'notifications'])->name('notifications');
     Route::get('/logs', [ProfileController::class, 'logs'])->name('logs');
+});
+
+// API Routes for OANDA Integration
+Route::prefix('api')->middleware('web')->group(function () {
+    // Market Data
+    Route::get('/market/prices', [MarketDataController::class, 'getPrices'])->name('api.market.prices');
+    Route::get('/market/instruments', [MarketDataController::class, 'getInstruments'])->name('api.market.instruments');
+    Route::get('/market/account-summary', [MarketDataController::class, 'getAccountSummary'])->name('api.market.account-summary');
+    Route::get('/market/xauusd/candles', [MarketDataController::class, 'getXAUUSDCandles'])->name('api.market.xauusd.candles');
+    
+    // Trade Execution
+    Route::post('/trade/execute', [TradeController::class, 'executeOrder'])->name('api.trade.execute');
+    Route::get('/trade/open', [TradeController::class, 'getOpenTrades'])->name('api.trade.open');
+    Route::post('/trade/close/{tradeId}', [TradeController::class, 'closeTrade'])->name('api.trade.close');
+    Route::get('/trade/history', [TradeController::class, 'getTradeHistory'])->name('api.trade.history');
+    
+    // Automated Trading Bot
+    Route::get('/bot/status', [AutomatedTradingController::class, 'status'])->name('api.bot.status');
+    Route::post('/bot/start', [AutomatedTradingController::class, 'start'])->name('api.bot.start');
+    Route::post('/bot/stop', [AutomatedTradingController::class, 'stop'])->name('api.bot.stop');
+    Route::post('/bot/execute-cycle', [AutomatedTradingController::class, 'executeCycle'])->name('api.bot.execute-cycle');
+    
+    // Market Signals
+    Route::get('/signals/active', [SignalController::class, 'getActiveSignals'])->name('api.signals.active');
+    Route::get('/signals/history', [SignalController::class, 'getSignalHistory'])->name('api.signals.history');
+    Route::post('/signals/generate', [SignalController::class, 'generateSignals'])->name('api.signals.generate');
+    Route::get('/signals/instrument/{instrument}', [SignalController::class, 'getSignalsByInstrument'])->name('api.signals.instrument');
+    Route::get('/signals/strategy/{strategy}', [SignalController::class, 'getSignalsByStrategy'])->name('api.signals.strategy');
+    
+    // Broker & Execution
+    Route::get('/broker/test-connection', [BrokerController::class, 'testConnection'])->name('api.broker.test-connection');
+    Route::get('/broker/execution-logs', [BrokerController::class, 'getExecutionLogs'])->name('api.broker.execution-logs');
+    Route::get('/broker/vps-status', [BrokerController::class, 'getVpsStatus'])->name('api.broker.vps-status');
 });

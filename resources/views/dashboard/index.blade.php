@@ -213,8 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Equity',
                     data: equityData,
-                    borderColor: 'rgb(59, 130, 246)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: TradingColors.entryExit.takeProfit,
+                    backgroundColor: TradingColors.toRgba(TradingColors.entryExit.takeProfit, 0.1),
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
@@ -279,11 +279,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     data: dailyPL,
                     backgroundColor: function(context) {
                         const value = context.parsed.y;
-                        return value >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+                        return value >= 0 
+                            ? TradingColors.toRgba(TradingColors.candles.bullish, 0.8)
+                            : TradingColors.toRgba(TradingColors.candles.bearish, 0.8);
                     },
                     borderColor: function(context) {
                         const value = context.parsed.y;
-                        return value >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)';
+                        return value >= 0 
+                            ? TradingColors.candles.bullish
+                            : TradingColors.candles.bearish;
                     },
                     borderWidth: 1
                 }]
@@ -341,8 +345,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Monthly Equity',
                     data: monthlyData,
-                    borderColor: 'rgb(168, 85, 247)',
-                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    borderColor: TradingColors.movingAverages.ema21,
+                    backgroundColor: TradingColors.toRgba(TradingColors.movingAverages.ema21, 0.1),
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
@@ -397,12 +401,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     data: [65.5, 34.5],
                     backgroundColor: [
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
+                        TradingColors.toRgba(TradingColors.candles.bullish, 0.8),
+                        TradingColors.toRgba(TradingColors.candles.bearish, 0.8)
                     ],
                     borderColor: [
-                        'rgba(34, 197, 94, 1)',
-                        'rgba(239, 68, 68, 1)'
+                        TradingColors.candles.bullish,
+                        TradingColors.candles.bearish
                     ],
                     borderWidth: 2
                 }]

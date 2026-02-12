@@ -37,3 +37,4 @@ class AnalyticsController extends Controller
     }
 }
 
+

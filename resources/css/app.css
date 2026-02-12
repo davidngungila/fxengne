@@ -8,6 +8,20 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* Professional Trading Colors */
+    --trading-bg-dark-navy: #0B1C2D;
+    --trading-candle-bullish: #00C853;
+    --trading-candle-bearish: #D50000;
+    --trading-ema-9: #FFD600;
+    --trading-ema-21: #00E5FF;
+    --trading-ema-200: #FFFFFF;
+    --trading-support: #2E7D32;
+    --trading-resistance: #C62828;
+    --trading-buy-arrow: #00C853;
+    --trading-sell-arrow: #D50000;
+    --trading-stop-loss: #FF6D00;
+    --trading-take-profit: #2962FF;
 }
 
 /* Sidebar Navigation Styles */
@@ -53,7 +67,7 @@
 }
 
 .nav-dropdown-item {
-    @apply block px-4 py-2 text-sm text-gray-600 rounded-lg transition-colors duration-200;
+    @apply flex items-center space-x-2 px-4 py-2 text-sm text-gray-600 rounded-lg transition-colors duration-200;
 }
 
 .nav-dropdown-item:hover {
@@ -96,11 +110,13 @@
 }
 
 .badge-success {
-    @apply bg-green-100 text-green-800;
+    background-color: rgba(0, 200, 83, 0.1);
+    color: var(--trading-candle-bullish);
 }
 
 .badge-danger {
-    @apply bg-red-100 text-red-800;
+    background-color: rgba(213, 0, 0, 0.1);
+    color: var(--trading-candle-bearish);
 }
 
 .badge-warning {
@@ -133,12 +149,63 @@
 }
 
 /* Form Styles */
-.form-input {
-    @apply block w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+.form-input,
+.form-input select,
+.form-input input[type="text"],
+.form-input input[type="email"],
+.form-input input[type="password"],
+.form-input input[type="number"],
+.form-input input[type="tel"],
+.form-input input[type="date"],
+.form-input textarea,
+select.form-input,
+input.form-input,
+textarea.form-input {
+    @apply block w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-200;
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+.form-input:focus,
+select.form-input:focus,
+input.form-input:focus,
+textarea.form-input:focus {
+    @apply outline-none border-blue-500 ring-2 ring-blue-500;
+    --tw-ring-opacity: 0.2;
+}
+
+select.form-input,
+select.form-input option {
+    @apply px-4 py-2.5;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    appearance: none;
+}
+
+select.form-input option {
+    @apply px-2 py-1;
+    padding: 0.5rem;
+}
+
+textarea.form-input {
+    @apply resize-y;
+    min-height: 100px;
 }
 
 .form-label {
     @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-checkbox {
+    @apply h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 transition-colors duration-200;
+    --tw-ring-opacity: 0.2;
+}
+
+.form-checkbox:checked {
+    @apply bg-blue-600 border-blue-600;
 }
 
 /* Header Dropdown Styles */
@@ -173,4 +240,54 @@
 
 ::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400;
+}
+
+/* Additional Form Element Fixes */
+select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea {
+    @apply px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900;
+    box-sizing: border-box;
+}
+
+select {
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    appearance: none;
+    min-height: 42px;
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+    @apply outline-none border-blue-500 ring-2 ring-blue-500;
+    --tw-ring-opacity: 0.2;
+}
+
+select option {
+    @apply px-2 py-1;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Ensure proper spacing in all form containers */
+.space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+.space-y-3 > * + * {
+    margin-top: 0.75rem;
+}
+
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
 }

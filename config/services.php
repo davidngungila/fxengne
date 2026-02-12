@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    'oanda' => [
+        'api_key' => env('OANDA_API_KEY'),
+        'account_id' => env('OANDA_ACCOUNT_ID'),
+        'environment' => env('OANDA_ENVIRONMENT', 'practice'), // 'practice' or 'live'
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
+    'notifications' => [
+        'email_enabled' => env('NOTIFICATIONS_EMAIL_ENABLED', false),
+        'email_address' => env('NOTIFICATIONS_EMAIL_ADDRESS'),
+    ],
+
 ];

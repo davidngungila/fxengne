@@ -1,5 +1,7 @@
 import './bootstrap';
 import { Chart, registerables } from 'chart.js';
+import { TradingColors } from './trading-colors';
+import { ChartConfig } from './chart-config';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -74,5 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Make Chart available globally
+// Make Chart, TradingColors, and ChartConfig available globally
 window.Chart = Chart;
+window.TradingColors = TradingColors;
+window.ChartConfig = ChartConfig;
