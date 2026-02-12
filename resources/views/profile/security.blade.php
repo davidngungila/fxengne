@@ -225,11 +225,11 @@
                         </form>
                     </details>
                 @else
-                    <a href="{{ route('auth.two-factor.setup') }}" class="btn btn-primary w-full">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('auth.two-factor.setup') }}" class="btn btn-primary w-full flex items-center justify-center whitespace-nowrap">
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        Enable Two-Factor Authentication
+                        <span>Enable Two-Factor Authentication</span>
                     </a>
                 @endif
 
