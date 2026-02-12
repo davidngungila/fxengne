@@ -15,6 +15,37 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 antialiased">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden">
+        <div class="text-center">
+            <!-- Rotating Loading Icon -->
+            <div class="relative w-20 h-20 mx-auto mb-6">
+                <div class="absolute inset-0 rounded-full border-4 border-blue-200"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                <div class="absolute inset-2 rounded-full bg-blue-50"></div>
+                <div class="absolute inset-4 rounded-full bg-blue-600 opacity-20 animate-pulse"></div>
+            </div>
+            
+            <!-- Main Text -->
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Verifying your code...</h2>
+            
+            <!-- Secondary Text -->
+            <p class="text-blue-600 text-sm mb-6">Please wait while we verify your authentication</p>
+            
+            <!-- Progress Bar -->
+            <div class="w-64 mx-auto h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+            
+            <!-- Loading Dots -->
+            <div class="flex justify-center space-x-2 mt-6">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div class="w-full max-w-md">
             <div class="bg-white rounded-2xl shadow-xl p-8">
@@ -35,7 +66,7 @@
                 @endif
 
                 <!-- Verification Form -->
-                <form action="{{ route('auth.two-factor.verify') }}" method="POST" class="space-y-6">
+                <form id="verifyForm" action="{{ route('auth.two-factor.verify') }}" method="POST" class="space-y-6">
                     @csrf
                     
                     <div>
@@ -58,6 +89,7 @@
 
                     <button 
                         type="submit" 
+                        id="submitBtn"
                         class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                         Verify Code
@@ -85,9 +117,122 @@
     </div>
 
     <script>
-    // Auto-format code input
-    document.getElementById('code').addEventListener('input', function(e) {
-        this.value = this.value.replace(/[^0-9]/g, '');
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('code');
+        const form = document.getElementById('verifyForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const progressBar = document.getElementById('progressBar');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Auto-format code input and auto-submit when 6 digits entered
+        codeInput.addEventListener('input', function(e) {
+            // Remove non-numeric characters
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Auto-submit when 6 digits are entered
+            if (this.value.length === 6) {
+                submitForm();
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitForm();
+        });
+
+        function submitForm() {
+            const code = codeInput.value.trim();
+            
+            if (code.length !== 6) {
+                return;
+            }
+
+            // Hide error messages
+            const errorDiv = document.querySelector('.bg-red-50');
+            if (errorDiv) {
+                errorDiv.classList.add('hidden');
+            }
+
+            // Show loading overlay
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
+            
+            // Disable submit button and input
+            submitBtn.disabled = true;
+            codeInput.disabled = true;
+            submitBtn.textContent = 'Verifying...';
+            
+            // Animate progress bar
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+
+            // Submit form
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+                body: new URLSearchParams(new FormData(form))
+            })
+            .then(response => {
+                // Complete progress bar
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+
+                if (response.ok) {
+                    // Success - redirect
+                    return response.json().then(data => {
+                        window.location.href = data.redirect || '{{ route("dashboard.index") }}';
+                    }).catch(() => {
+                        // If response is HTML redirect, follow it
+                        window.location.href = '{{ route("dashboard.index") }}';
+                    });
+                } else {
+                    // Error - show error message
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Invalid verification code');
+                    }).catch(() => {
+                        throw new Error('Invalid verification code');
+                    });
+                }
+            })
+            .catch(error => {
+                // Hide loading overlay
+                loadingOverlay.classList.add('hidden');
+                loadingOverlay.classList.remove('flex');
+                
+                // Reset progress bar
+                progressBar.style.width = '0%';
+                clearInterval(progressInterval);
+                
+                // Show error message
+                let errorDiv = document.querySelector('.bg-red-50');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'mb-4 p-4 bg-red-50 border border-red-200 rounded-lg';
+                    form.insertBefore(errorDiv, form.firstChild);
+                }
+                errorDiv.innerHTML = '<p class="text-sm text-red-600">' + error.message + '</p>';
+                errorDiv.classList.remove('hidden');
+                
+                // Re-enable submit button and input
+                submitBtn.disabled = false;
+                codeInput.disabled = false;
+                codeInput.focus();
+                codeInput.select();
+                submitBtn.textContent = 'Verify Code';
+            });
+        }
+
+        // Focus on code input when page loads
+        codeInput.focus();
     });
     </script>
 </body>
