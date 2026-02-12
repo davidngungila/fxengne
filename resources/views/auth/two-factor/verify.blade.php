@@ -27,10 +27,10 @@
             </div>
             
             <!-- Main Text -->
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">Verifying your code...</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Verifying your identity...</h2>
             
             <!-- Secondary Text -->
-            <p class="text-blue-600 text-sm mb-6">Please wait while we verify your authentication</p>
+            <p class="text-blue-600 text-sm mb-6">Securing your trading account</p>
             
             <!-- Progress Bar -->
             <div class="w-64 mx-auto h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -123,10 +123,10 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const progressBar = document.getElementById('progressBar');
         const submitBtn = document.getElementById('submitBtn');
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 
-        // Auto-format code input and auto-submit when 6 digits entered
+        // Auto-format code input
         codeInput.addEventListener('input', function(e) {
-            // Remove non-numeric characters
             this.value = this.value.replace(/[^0-9]/g, '');
             
             // Auto-submit when 6 digits are entered
@@ -158,9 +158,8 @@
             loadingOverlay.classList.remove('hidden');
             loadingOverlay.classList.add('flex');
             
-            // Disable submit button and input
+            // Disable submit button
             submitBtn.disabled = true;
-            codeInput.disabled = true;
             submitBtn.textContent = 'Verifying...';
             
             // Animate progress bar
@@ -176,63 +175,74 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
                     'Accept': 'application/json',
                 },
-                body: new URLSearchParams(new FormData(form))
+                body: new URLSearchParams({
+                    code: code,
+                    _token: CSRF_TOKEN
+                })
             })
             .then(response => {
-                // Complete progress bar
                 clearInterval(progressInterval);
                 progressBar.style.width = '100%';
 
-                if (response.ok) {
-                    // Success - redirect
-                    return response.json().then(data => {
+                return response.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch {
+                        // If not JSON, check if it's a redirect
+                        if (response.redirected || response.status === 200) {
+                            return { success: true, redirect: response.url || '{{ route("dashboard.index") }}' };
+                        }
+                        return { success: false, message: 'Verification failed' };
+                    }
+                });
+            })
+            .then(data => {
+                // Wait a bit for animation
+                setTimeout(() => {
+                    if (data.success || data.redirect) {
+                        // Success - redirect
                         window.location.href = data.redirect || '{{ route("dashboard.index") }}';
-                    }).catch(() => {
-                        // If response is HTML redirect, follow it
-                        window.location.href = '{{ route("dashboard.index") }}';
-                    });
-                } else {
-                    // Error - show error message
-                    return response.json().then(data => {
-                        throw new Error(data.message || 'Invalid verification code');
-                    }).catch(() => {
-                        throw new Error('Invalid verification code');
-                    });
-                }
+                    } else {
+                        // Show error
+                        showError(data.message || 'Invalid verification code. Please try again.');
+                    }
+                }, 500);
             })
             .catch(error => {
-                // Hide loading overlay
-                loadingOverlay.classList.add('hidden');
-                loadingOverlay.classList.remove('flex');
-                
-                // Reset progress bar
-                progressBar.style.width = '0%';
                 clearInterval(progressInterval);
-                
-                // Show error message
-                let errorDiv = document.querySelector('.bg-red-50');
-                if (!errorDiv) {
-                    errorDiv = document.createElement('div');
-                    errorDiv.className = 'mb-4 p-4 bg-red-50 border border-red-200 rounded-lg';
-                    form.insertBefore(errorDiv, form.firstChild);
-                }
-                errorDiv.innerHTML = '<p class="text-sm text-red-600">' + error.message + '</p>';
-                errorDiv.classList.remove('hidden');
-                
-                // Re-enable submit button and input
-                submitBtn.disabled = false;
-                codeInput.disabled = false;
-                codeInput.focus();
-                codeInput.select();
-                submitBtn.textContent = 'Verify Code';
+                showError('An error occurred. Please try again.');
             });
         }
 
-        // Focus on code input when page loads
-        codeInput.focus();
+        function showError(message) {
+            // Hide loading overlay
+            loadingOverlay.classList.add('hidden');
+            loadingOverlay.classList.remove('flex');
+            
+            // Reset progress bar
+            progressBar.style.width = '0%';
+            
+            // Show error message
+            let errorDiv = document.querySelector('.bg-red-50');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'mb-4 p-4 bg-red-50 border border-red-200 rounded-lg';
+                form.insertBefore(errorDiv, form.firstChild);
+            }
+            errorDiv.innerHTML = '<p class="text-sm text-red-600">' + message + '</p>';
+            errorDiv.classList.remove('hidden');
+            
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify Code';
+            
+            // Clear and focus input
+            codeInput.value = '';
+            codeInput.focus();
+        }
     });
     </script>
 </body>

@@ -48,7 +48,7 @@ class TwoFactorController extends Controller
     public function enable(Request $request)
     {
         $request->validate([
-            'code' => 'required|string',
+            'code' => 'required|string|size:6',
         ]);
 
         $user = Auth::user();
@@ -57,16 +57,9 @@ class TwoFactorController extends Controller
             return back()->withErrors(['code' => '2FA setup not initiated']);
         }
 
-        // Trim and validate code
-        $code = trim($request->code);
-        
-        if (strlen($code) !== 6 || !ctype_digit($code)) {
-            return back()->withErrors(['code' => 'Code must be exactly 6 digits']);
-        }
-
         // Verify the code
-        if (!$this->twoFactorService->verify($user, $code)) {
-            return back()->withErrors(['code' => 'Invalid verification code. Please check your authenticator app and try again.']);
+        if (!$this->twoFactorService->verify($user, $request->code)) {
+            return back()->withErrors(['code' => 'Invalid verification code']);
         }
 
         // Enable 2FA
@@ -195,41 +188,45 @@ class TwoFactorController extends Controller
 
         $user = Auth::user();
 
-        // Trim the code and remove any spaces
-        $code = trim($request->code);
-        $code = str_replace(' ', '', $code);
-
-        // Check if user has 2FA enabled
-        if (!$user->hasTwoFactorEnabled()) {
-            return back()->withErrors(['code' => 'Two-factor authentication is not enabled for your account.']);
-        }
-
-        // Try recovery code first (they're longer and contain dashes)
-        if (strlen($code) > 6 && strpos($code, '-') !== false) {
-            if ($this->twoFactorService->verifyRecoveryCode($user, $code)) {
-                session()->forget('two_factor_required');
-                session(['two_factor_verified' => true]);
-                return redirect()->intended(route('dashboard.index'))
-                    ->with('success', 'Recovery code used. Please regenerate your recovery codes.');
+        // Try verification code first
+        if ($this->twoFactorService->verify($user, $request->code)) {
+            session()->forget('two_factor_required');
+            session(['two_factor_verified' => true]);
+            
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('dashboard.index')
+                ]);
             }
+            
+            return redirect()->intended(route('dashboard.index'));
         }
 
-        // Try verification code (6 digits)
-        if (strlen($code) === 6 && ctype_digit($code)) {
-            if ($this->twoFactorService->verify($user, $code)) {
-                session()->forget('two_factor_required');
-                session(['two_factor_verified' => true]);
-                return redirect()->intended(route('dashboard.index'));
+        // Try recovery code
+        if ($this->twoFactorService->verifyRecoveryCode($user, $request->code)) {
+            session()->forget('two_factor_required');
+            session(['two_factor_verified' => true]);
+            
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('dashboard.index'),
+                    'message' => 'Recovery code used. Please regenerate your recovery codes.'
+                ]);
             }
+            
+            return redirect()->intended(route('dashboard.index'))
+                ->with('success', 'Recovery code used. Please regenerate your recovery codes.');
         }
 
-        \Log::warning('2FA Verification Failed', [
-            'user_id' => $user->id,
-            'code_length' => strlen($code),
-            'has_secret' => !empty($user->two_factor_secret),
-            'secret_length' => $user->two_factor_secret ? strlen($user->two_factor_secret) : 0
-        ]);
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid verification code'
+            ], 422);
+        }
 
-        return back()->withErrors(['code' => 'Invalid verification code. Please check your authenticator app and try again.']);
+        return back()->withErrors(['code' => 'Invalid verification code']);
     }
 }
