@@ -500,9 +500,9 @@ document.addEventListener('DOMContentLoaded', function() {
     score += 20;
     
     // 2FA enabled
-    if ({{ auth()->user()->hasTwoFactorEnabled() ? 'true' : 'false' }}) {
-        score += 30;
-    }
+    @if(auth()->user()->hasTwoFactorEnabled())
+    score += 30;
+    @endif
     
     // Update security score
     const scoreElement = document.getElementById('securityScore');
