@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +20,26 @@ class NotificationService
         $this->telegramChatId = config('services.telegram.chat_id');
         $this->telegramEnabled = !empty($this->telegramBotToken) && !empty($this->telegramChatId);
         $this->emailEnabled = config('services.notifications.email_enabled', false);
+    }
+
+    /**
+     * Create and send notification
+     */
+    public function create($type, $title, $message, $data = [], $severity = 'info')
+    {
+        // Store in database
+        $notification = Notification::create([
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'data' => $data,
+            'severity' => $severity,
+        ]);
+
+        // Send external notifications
+        $this->send($title, $data);
+
+        return $notification;
     }
 
     /**
@@ -122,26 +143,101 @@ class NotificationService
     public function sendTradeNotification($tradeData)
     {
         $title = "✅ Trade Executed";
-        $message = $this->formatTradeMessage($tradeData);
+        $message = "Trade executed: {$tradeData['instrument']} {$tradeData['direction']} {$tradeData['units']} units at {$tradeData['entry_price']}";
         
-        $this->send($title, $tradeData);
+        return $this->create(
+            'trade_executed',
+            $title,
+            $message,
+            $tradeData,
+            'success'
+        );
     }
 
     /**
-     * Format trade message
+     * Send trade closed notification
      */
-    protected function formatTradeMessage($tradeData)
+    public function sendTradeClosedNotification($tradeData)
     {
-        $message = "<b>✅ Trade Executed</b>\n\n";
-        $message .= "📊 <b>Instrument:</b> {$tradeData['instrument']}\n";
-        $message .= "📈 <b>Direction:</b> {$tradeData['direction']}\n";
-        $message .= "💰 <b>Units:</b> {$tradeData['units']}\n";
-        $message .= "💵 <b>Entry Price:</b> {$tradeData['entry_price']}\n";
-        $message .= "🛑 <b>Stop Loss:</b> {$tradeData['stop_loss']}\n";
-        $message .= "🎯 <b>Take Profit:</b> {$tradeData['take_profit']}\n";
-        $message .= "📊 <b>Strategy:</b> {$tradeData['strategy']}\n";
+        $pl = $tradeData['realized_pl'] ?? 0;
+        $severity = $pl >= 0 ? 'success' : 'danger';
+        $title = $pl >= 0 ? "✅ Trade Closed (Profit)" : "❌ Trade Closed (Loss)";
+        $message = "Trade closed: {$tradeData['instrument']} - P/L: $" . number_format($pl, 2);
         
-        return $message;
+        return $this->create(
+            'trade_closed',
+            $title,
+            $message,
+            $tradeData,
+            $severity
+        );
+    }
+
+    /**
+     * Send signal notification
+     */
+    public function sendSignalNotification($signalData)
+    {
+        $title = "📊 New Trading Signal";
+        $message = "New {$signalData['type']} signal for {$signalData['instrument']} - Strength: {$signalData['strength']}%";
+        
+        return $this->create(
+            'signal_generated',
+            $title,
+            $message,
+            $signalData,
+            'info'
+        );
+    }
+
+    /**
+     * Send risk alert notification
+     */
+    public function sendRiskAlert($alertData)
+    {
+        $title = "⚠️ Risk Alert";
+        $message = $alertData['message'] ?? "Risk threshold reached";
+        
+        return $this->create(
+            'risk_alert',
+            $title,
+            $message,
+            $alertData,
+            'warning'
+        );
+    }
+
+    /**
+     * Send drawdown alert
+     */
+    public function sendDrawdownAlert($drawdownData)
+    {
+        $title = "📉 Drawdown Alert";
+        $message = "Current drawdown: {$drawdownData['drawdown']}% - Limit: {$drawdownData['limit']}%";
+        
+        return $this->create(
+            'drawdown_alert',
+            $title,
+            $message,
+            $drawdownData,
+            'warning'
+        );
+    }
+
+    /**
+     * Send daily limit alert
+     */
+    public function sendDailyLimitAlert($limitData)
+    {
+        $title = "⚠️ Daily Limit Alert";
+        $message = "Daily {$limitData['type']} limit reached: {$limitData['used']} / {$limitData['limit']}";
+        
+        return $this->create(
+            'daily_limit_alert',
+            $title,
+            $message,
+            $limitData,
+            'warning'
+        );
     }
 }
-

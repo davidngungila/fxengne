@@ -428,6 +428,37 @@
                             </div>
                         </li>
 
+                        <!-- Admin (Only for Admins) -->
+                        @if(auth()->check() && auth()->user()->isAdmin())
+                        <li>
+                            <div class="nav-dropdown">
+                                <button class="nav-item nav-dropdown-toggle {{ request()->routeIs('admin.*') ? 'active' : '' }}">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                    <span>Admin</span>
+                                    <svg class="w-4 h-4 ml-auto transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <ul class="nav-dropdown-menu">
+                                    <li><a href="{{ route('admin.index') }}" class="nav-dropdown-item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                        </svg>
+                                        <span>Admin Dashboard</span>
+                                    </a></li>
+                                    <li><a href="{{ route('admin.users') }}" class="nav-dropdown-item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                        <span>User Management</span>
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        @endif
+
                         <!-- Profile -->
                         <li>
                             <div class="nav-dropdown">
@@ -491,57 +522,28 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <!-- Notifications -->
-                    <div class="relative header-dropdown">
-                        <button class="relative p-2 text-gray-500 hover:text-gray-700 header-dropdown-toggle">
+                    <div class="relative header-dropdown" id="notificationDropdown">
+                        <button class="relative p-2 text-gray-500 hover:text-gray-700 header-dropdown-toggle" id="notificationBell">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                             </svg>
-                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            <span id="notificationBadge" class="absolute top-0 right-0 block h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-semibold hidden">0</span>
                         </button>
-                        <div class="header-dropdown-menu">
-                            <div class="px-4 py-3 border-b border-gray-200">
+                        <div class="header-dropdown-menu w-96">
+                            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
                                 <h3 class="text-sm font-semibold text-gray-900">Notifications</h3>
+                                <button id="markAllRead" class="text-xs text-blue-600 hover:text-blue-700 font-medium">Mark all read</button>
                             </div>
-                            <div class="max-h-96 overflow-y-auto">
-                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900">New Trade Executed</p>
-                                            <p class="text-xs text-gray-500 mt-1">EURUSD BUY order opened at 1.0850</p>
-                                            <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900">Take Profit Hit</p>
-                                            <p class="text-xs text-gray-500 mt-1">GBPUSD trade closed with +$150 profit</p>
-                                            <p class="text-xs text-gray-400 mt-1">15 minutes ago</p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
-                                    <div class="flex items-start space-x-3">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-medium text-gray-900">Risk Limit Warning</p>
-                                            <p class="text-xs text-gray-500 mt-1">Daily loss limit at 80%</p>
-                                            <p class="text-xs text-gray-400 mt-1">1 hour ago</p>
-                                        </div>
-                                    </div>
-                                </a>
+                            <div id="notificationsList" class="max-h-96 overflow-y-auto">
+                                <div class="px-4 py-8 text-center text-gray-500">
+                                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                    <p class="text-sm">Loading notifications...</p>
+                                </div>
                             </div>
                             <div class="px-4 py-2 border-t border-gray-200 bg-gray-50">
-                                <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View all notifications</a>
+                                <a href="{{ route('profile.notifications') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">View all notifications</a>
                             </div>
                         </div>
                     </div>
@@ -552,7 +554,9 @@
                             <div class="text-left">
                                 <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name ?? 'User' }}</p>
                                 <p class="text-xs text-gray-500">{{ auth()->user()->email ?? 'user@example.com' }}</p>
-                                <p class="text-xs text-blue-600 font-medium mt-0.5">{{ auth()->user()->role ?? 'Trader' }}</p>
+                                <p class="text-xs {{ auth()->user()->isAdmin() ? 'text-purple-600' : 'text-blue-600' }} font-medium mt-0.5">
+                                    {{ ucfirst(auth()->user()->role ?? 'Trader') }}
+                                </p>
                             </div>
                             <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                                 <span class="text-white font-semibold text-sm">{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</span>
@@ -607,14 +611,17 @@
                                 </a>
                             </div>
                             <div class="px-4 py-2 border-t border-gray-200 bg-gray-50">
-                                <a href="#" class="block text-sm text-red-600 hover:text-red-700 font-medium">
-                                    <div class="flex items-center space-x-3">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                        </svg>
-                                        <span>Sign Out</span>
-                                    </div>
-                                </a>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left block text-sm text-red-600 hover:text-red-700 font-medium">
+                                        <div class="flex items-center space-x-3">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                            </svg>
+                                            <span>Sign Out</span>
+                                        </div>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -629,5 +636,168 @@
     </div>
 
     @stack('scripts')
+    
+    <!-- Real-time Notifications Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const API_BASE_URL = '{{ url("/api") }}';
+        const CSRF_TOKEN = '{{ csrf_token() }}';
+        let notificationCheckInterval;
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/notifications?limit=10`);
+                const result = await response.json();
+
+                if (result.success) {
+                    updateNotificationBadge(result.unread_count || 0);
+                    renderNotifications(result.data || []);
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        // Update notification badge
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        // Render notifications
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notificationsList');
+            if (!container) return;
+
+            if (notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="px-4 py-8 text-center text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <p class="text-sm">No notifications</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = notifications.map(notif => {
+                const severityColors = {
+                    'success': 'bg-green-500',
+                    'danger': 'bg-red-500',
+                    'warning': 'bg-yellow-500',
+                    'info': 'bg-blue-500'
+                };
+                const color = severityColors[notif.severity] || 'bg-blue-500';
+                const timeAgo = getTimeAgo(new Date(notif.created_at));
+                const readClass = notif.read ? 'opacity-60' : '';
+
+                return `
+                    <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 cursor-pointer notification-item ${readClass}" data-id="${notif.id}" data-read="${notif.read}">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="w-2 h-2 ${color} rounded-full mt-2 ${notif.read ? 'opacity-50' : ''}"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">${notif.title}</p>
+                                <p class="text-xs text-gray-500 mt-1">${notif.message}</p>
+                                <p class="text-xs text-gray-400 mt-1">${timeAgo}</p>
+                            </div>
+                            ${!notif.read ? '<button class="mark-read-btn text-xs text-blue-600 hover:text-blue-700" data-id="' + notif.id + '">Mark read</button>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Add click handlers
+            container.querySelectorAll('.notification-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('mark-read-btn')) {
+                        markAsRead(this.dataset.id);
+                    }
+                });
+            });
+
+            // Add mark read handlers
+            container.querySelectorAll('.mark-read-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    markAsRead(this.dataset.id);
+                });
+            });
+        }
+
+        // Mark notification as read
+        async function markAsRead(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN
+                    }
+                });
+
+                if (response.ok) {
+                    loadNotifications();
+                }
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        // Mark all as read
+        document.getElementById('markAllRead')?.addEventListener('click', async function() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN
+                    }
+                });
+
+                if (response.ok) {
+                    loadNotifications();
+                }
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+            }
+        });
+
+        // Get time ago
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return minutes + ' minute' + (minutes > 1 ? 's' : '') + ' ago';
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return hours + ' hour' + (hours > 1 ? 's' : '') + ' ago';
+            const days = Math.floor(hours / 24);
+            return days + ' day' + (days > 1 ? 's' : '') + ' ago';
+        }
+
+        // Initial load
+        loadNotifications();
+
+        // Check for new notifications every 10 seconds
+        notificationCheckInterval = setInterval(loadNotifications, 10000);
+
+        // Also check when page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                loadNotifications();
+            }
+        });
+    });
+    </script>
 </body>
 </html>

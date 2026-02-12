@@ -85,6 +85,20 @@ class SignalController extends Controller
         
         $signals = $this->signalService->generateSignals($strategies);
 
+        // Create notifications for new signals
+        if (count($signals) > 0) {
+            $notificationService = app(\App\Services\NotificationService::class);
+            foreach ($signals as $signal) {
+                $notificationService->sendSignalNotification([
+                    'type' => $signal['type'] ?? 'BUY',
+                    'instrument' => $signal['instrument'] ?? 'N/A',
+                    'strength' => $signal['strength'] ?? 0,
+                    'strategy' => $signal['strategy'] ?? 'Unknown',
+                    'price' => $signal['price'] ?? 0,
+                ]);
+            }
+        }
+
         return response()->json([
             'success' => true,
             'data' => $signals,

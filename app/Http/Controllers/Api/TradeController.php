@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\OandaService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -11,10 +12,12 @@ use Illuminate\Support\Facades\Validator;
 class TradeController extends Controller
 {
     protected $oandaService;
+    protected $notificationService;
 
-    public function __construct(OandaService $oandaService)
+    public function __construct(OandaService $oandaService, NotificationService $notificationService)
     {
         $this->oandaService = $oandaService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -48,6 +51,18 @@ class TradeController extends Controller
         );
 
         if (isset($result['orderFillTransaction'])) {
+            // Create notification for trade execution
+            $transaction = $result['orderFillTransaction'];
+            $this->notificationService->sendTradeNotification([
+                'instrument' => $request->instrument,
+                'direction' => $request->side,
+                'units' => $request->units,
+                'entry_price' => $transaction['price'] ?? 0,
+                'stop_loss' => $request->stop_loss ?? 'Not set',
+                'take_profit' => $request->take_profit ?? 'Not set',
+                'strategy' => 'Manual Entry',
+            ]);
+
             return response()->json([
                 'success' => true,
                 'data' => $result,
@@ -89,6 +104,28 @@ class TradeController extends Controller
         $result = $this->oandaService->closeTrade($tradeId);
 
         if (isset($result['orderFillTransaction'])) {
+            // Create notification for trade closure
+            $transaction = $result['orderFillTransaction'];
+            $pl = $transaction['pl'] ?? 0;
+            
+            // Get trade details first
+            $openTrades = $this->oandaService->getOpenTrades();
+            $trade = null;
+            if ($openTrades && isset($openTrades['trades'])) {
+                foreach ($openTrades['trades'] as $t) {
+                    if ($t['id'] == $tradeId) {
+                        $trade = $t;
+                        break;
+                    }
+                }
+            }
+
+            $this->notificationService->sendTradeClosedNotification([
+                'instrument' => $trade['instrument'] ?? 'N/A',
+                'realized_pl' => $pl,
+                'close_time' => now(),
+            ]);
+
             return response()->json([
                 'success' => true,
                 'data' => $result,
