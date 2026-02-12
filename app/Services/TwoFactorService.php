@@ -47,7 +47,16 @@ class TwoFactorService
             return false;
         }
 
-        return $this->google2fa->verifyKey($user->two_factor_secret, $code);
+        // Trim and ensure code is exactly 6 digits
+        $code = trim($code);
+        
+        if (strlen($code) !== 6 || !ctype_digit($code)) {
+            return false;
+        }
+
+        // Verify with a window of 2 (allows for clock skew of ±60 seconds)
+        // This checks the current time step and ±2 time steps (each step is 30 seconds)
+        return $this->google2fa->verifyKey($user->two_factor_secret, $code, 2);
     }
 
     /**

@@ -188,21 +188,26 @@ class TwoFactorController extends Controller
 
         $user = Auth::user();
 
-        // Try verification code first
-        if ($this->twoFactorService->verify($user, $request->code)) {
+        // Trim the code
+        $code = trim($request->code);
+
+        // Try recovery code first (they're longer and contain dashes)
+        if (strlen($code) > 6 && strpos($code, '-') !== false) {
+            if ($this->twoFactorService->verifyRecoveryCode($user, $code)) {
+                session()->forget('two_factor_required');
+                session(['two_factor_verified' => true]);
+                return redirect()->intended(route('dashboard.index'))
+                    ->with('success', 'Recovery code used. Please regenerate your recovery codes.');
+            }
+        }
+
+        // Try verification code (6 digits)
+        if ($this->twoFactorService->verify($user, $code)) {
             session()->forget('two_factor_required');
             session(['two_factor_verified' => true]);
             return redirect()->intended(route('dashboard.index'));
         }
 
-        // Try recovery code
-        if ($this->twoFactorService->verifyRecoveryCode($user, $request->code)) {
-            session()->forget('two_factor_required');
-            session(['two_factor_verified' => true]);
-            return redirect()->intended(route('dashboard.index'))
-                ->with('success', 'Recovery code used. Please regenerate your recovery codes.');
-        }
-
-        return back()->withErrors(['code' => 'Invalid verification code']);
+        return back()->withErrors(['code' => 'Invalid verification code. Please check your authenticator app and try again.']);
     }
 }
