@@ -68,6 +68,8 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        session()->forget('two_factor_verified');
+        session()->forget('two_factor_required');
 
         return redirect()->route('login');
     }
