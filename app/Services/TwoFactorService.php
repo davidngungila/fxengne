@@ -50,6 +50,7 @@ class TwoFactorService
 
         // Trim and ensure code is exactly 6 digits
         $code = trim($code);
+        $code = preg_replace('/[^0-9]/', '', $code); // Remove any non-numeric characters
         
         if (strlen($code) !== 6 || !ctype_digit($code)) {
             \Log::error('2FA Verification Failed: Invalid code format', [
@@ -61,20 +62,28 @@ class TwoFactorService
         }
 
         try {
+            // Ensure secret is uppercase (base32 should be uppercase)
+            $secret = strtoupper(trim($user->two_factor_secret));
+            
             // Verify with a window of 8 (allows for clock skew of ±4 minutes)
             // Window parameter: checks current time step ± window steps
             // Each time step is 30 seconds, so window of 8 = ±4 minutes
             // The verifyKey method signature: verifyKey($secret, $key, $window = null, $timestamp = null)
-            $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 8);
+            $verified = $this->google2fa->verifyKey($secret, $code, 8);
             
             if (!$verified) {
                 // Try with window of 4 as fallback
-                $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 4);
+                $verified = $this->google2fa->verifyKey($secret, $code, 4);
             }
             
             if (!$verified) {
-                // Try with window of 2 as last fallback
-                $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 2);
+                // Try with window of 2 as fallback
+                $verified = $this->google2fa->verifyKey($secret, $code, 2);
+            }
+            
+            if (!$verified) {
+                // Try with window of 1 (default) as last fallback
+                $verified = $this->google2fa->verifyKey($secret, $code, 1);
             }
             
             if (!$verified) {
@@ -82,10 +91,11 @@ class TwoFactorService
                     'user_id' => $user->id,
                     'email' => $user->email,
                     'code' => $code,
-                    'secret_length' => strlen($user->two_factor_secret),
-                    'secret_preview' => substr($user->two_factor_secret, 0, 10) . '...',
+                    'secret_length' => strlen($secret),
+                    'secret_preview' => substr($secret, 0, 10) . '...',
                     'timestamp' => time(),
-                    'server_time' => now()->toDateTimeString()
+                    'server_time' => now()->toDateTimeString(),
+                    'secret_original' => substr($user->two_factor_secret, 0, 10) . '...'
                 ]);
             } else {
                 \Log::info('2FA Verification Success', [
