@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Risk Management - FxEngne')
+@section('title', 'Risk Management - FXEngine')
 @section('page-title', 'Risk Management')
 
 @section('content')

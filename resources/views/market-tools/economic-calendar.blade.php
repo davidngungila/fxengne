@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Economic Calendar - FxEngne')
+@section('title', 'Economic Calendar - FXEngine')
 @section('page-title', 'Economic Calendar')
 
 @section('content')

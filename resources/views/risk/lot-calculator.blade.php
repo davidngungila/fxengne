@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Lot Size Calculator - FxEngne')
+@section('title', 'Lot Size Calculator - FXEngine')
 @section('page-title', 'Lot Size Calculator')
 
 @section('content')

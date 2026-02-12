@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Daily Limits - FxEngne')
+@section('title', 'Daily Limits - FXEngine')
 @section('page-title', 'Daily Limits')
 
 @section('content')

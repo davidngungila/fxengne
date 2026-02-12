@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pair Performance - FxEngne')
+@section('title', 'Pair Performance - FXEngine')
 @section('page-title', 'Pair Performance')
 
 @section('content')

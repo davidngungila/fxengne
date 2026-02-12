@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'VPS Status - FxEngne')
+@section('title', 'VPS Status - FXEngine')
 @section('page-title', 'VPS Status')
 
 @section('content')

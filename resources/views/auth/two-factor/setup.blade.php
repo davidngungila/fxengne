@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Setup Two-Factor Authentication - FxEngne')
+@section('title', 'Setup Two-Factor Authentication - FXEngine')
 @section('page-title', 'Setup Two-Factor Authentication')
 
 @section('content')

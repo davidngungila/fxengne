@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Market Tools - FxEngne')
+@section('title', 'Market Tools - FXEngine')
 @section('page-title', 'Market Tools')
 
 @section('content')

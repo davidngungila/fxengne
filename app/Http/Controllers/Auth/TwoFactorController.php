@@ -117,9 +117,9 @@ class TwoFactorController extends Controller
         }
 
         $recoveryCodes = $user->getRecoveryCodes();
-        $filename = 'fxengne-recovery-codes-' . date('Y-m-d') . '.txt';
+        $filename = 'fxengine-recovery-codes-' . date('Y-m-d') . '.txt';
         
-        $content = "FxEngne - Two-Factor Authentication Recovery Codes\n";
+        $content = "FXEngine - Two-Factor Authentication Recovery Codes\n";
         $content .= "==================================================\n\n";
         $content .= "Account: " . $user->email . "\n";
         $content .= "Generated: " . now()->format('Y-m-d H:i:s') . "\n\n";

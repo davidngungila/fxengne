@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Drawdown Protection - FxEngne')
+@section('title', 'Drawdown Protection - FXEngine')
 @section('page-title', 'Drawdown Protection')
 
 @section('content')

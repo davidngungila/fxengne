@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'FxEngne - Personal Trading System')</title>
+    <title>@yield('title', 'FXEngine - Personal Trading System')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -25,7 +25,7 @@
                         <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <span class="text-white font-bold text-sm">FX</span>
                         </div>
-                        <span class="text-xl font-bold text-gray-900">FxEngne</span>
+                        <span class="text-xl font-bold text-gray-900">FXEngine</span>
                     </div>
                     <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

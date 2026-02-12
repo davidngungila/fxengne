@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Spread Monitor - FxEngne')
+@section('title', 'Spread Monitor - FXEngine')
 @section('page-title', 'Spread Monitor')
 
 @section('content')

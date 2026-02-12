@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Recovery Codes - FxEngne')
+@section('title', 'Recovery Codes - FXEngine')
 @section('page-title', 'Recovery Codes')
 
 @section('content')
@@ -325,7 +325,7 @@ function printCodes() {
     // Create print-friendly content
     const printContent = `
         <div style="padding: 40px; font-family: Arial, sans-serif;">
-            <h1 style="color: #1f2937; margin-bottom: 10px;">FxEngne - Recovery Codes</h1>
+            <h1 style="color: #1f2937; margin-bottom: 10px;">FXEngine - Recovery Codes</h1>
             <p style="color: #6b7280; margin-bottom: 30px;">Generated: ${new Date().toLocaleString()}</p>
             
             <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
@@ -362,7 +362,7 @@ function printCodes() {
     printWindow.document.write(`
         <html>
             <head>
-                <title>FxEngne Recovery Codes</title>
+                <title>FXEngine Recovery Codes</title>
                 <style>
                     body { margin: 0; padding: 0; }
                     @media print {

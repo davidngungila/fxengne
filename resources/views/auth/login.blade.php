@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Login - FxEngne</title>
+    <title>Login - FXEngine</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -55,7 +55,7 @@
                     <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl mb-4">
                         <span class="text-white font-bold text-2xl">FX</span>
                     </div>
-                    <h1 class="text-3xl font-bold text-gray-900">FxEngne</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">FXEngine</h1>
                     <p class="text-gray-600 mt-2">Sign in to your trading account</p>
                 </div>
 
