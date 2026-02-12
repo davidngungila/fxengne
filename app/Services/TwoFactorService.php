@@ -61,25 +61,24 @@ class TwoFactorService
         }
 
         try {
-            // Get the current timestamp
-            $timestamp = $this->google2fa->getTimestamp();
-            
-            // Verify with a window of 4 (allows for clock skew of ±2 minutes)
-            // Window of 4 means ±2 time steps (each step is 30 seconds)
-            // This accounts for server time differences and user device clock drift
-            $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 4, $timestamp);
-            
-            if (!$verified) {
-                // Try with a larger window as fallback
-                $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 8, $timestamp);
-            }
+            // Verify with a window of 8 (allows for clock skew of ±4 minutes)
+            // Window parameter: checks current time step ± window steps
+            // Each time step is 30 seconds, so window of 8 = ±4 minutes
+            $verified = $this->google2fa->verifyKey($user->two_factor_secret, $code, 8);
             
             if (!$verified) {
                 \Log::warning('2FA Verification Failed: Code mismatch', [
                     'user_id' => $user->id,
+                    'email' => $user->email,
                     'code' => $code,
                     'secret_length' => strlen($user->two_factor_secret),
-                    'secret_preview' => substr($user->two_factor_secret, 0, 10) . '...'
+                    'secret_preview' => substr($user->two_factor_secret, 0, 10) . '...',
+                    'timestamp' => time()
+                ]);
+            } else {
+                \Log::info('2FA Verification Success', [
+                    'user_id' => $user->id,
+                    'email' => $user->email
                 ]);
             }
             
@@ -89,7 +88,8 @@ class TwoFactorService
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
                 'code' => $code,
-                'trace' => $e->getTraceAsString()
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
             return false;
         }
