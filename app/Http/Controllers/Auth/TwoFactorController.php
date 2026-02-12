@@ -48,7 +48,7 @@ class TwoFactorController extends Controller
     public function enable(Request $request)
     {
         $request->validate([
-            'code' => 'required|string|size:6',
+            'code' => 'required|string',
         ]);
 
         $user = Auth::user();
@@ -57,9 +57,16 @@ class TwoFactorController extends Controller
             return back()->withErrors(['code' => '2FA setup not initiated']);
         }
 
+        // Trim and validate code
+        $code = trim($request->code);
+        
+        if (strlen($code) !== 6 || !ctype_digit($code)) {
+            return back()->withErrors(['code' => 'Code must be exactly 6 digits']);
+        }
+
         // Verify the code
-        if (!$this->twoFactorService->verify($user, $request->code)) {
-            return back()->withErrors(['code' => 'Invalid verification code']);
+        if (!$this->twoFactorService->verify($user, $code)) {
+            return back()->withErrors(['code' => 'Invalid verification code. Please check your authenticator app and try again.']);
         }
 
         // Enable 2FA
