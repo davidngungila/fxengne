@@ -414,6 +414,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Register zoom plugin if available
     if (typeof zoomPlugin !== 'undefined') {
         Chart.register(zoomPlugin);
+    } else if (typeof window.ChartZoom !== 'undefined') {
+        Chart.register(window.ChartZoom);
     }
     const API_BASE_URL = '{{ url("/api") }}';
     const currentPrice = {{ $currentPrice }};
