@@ -1630,6 +1630,16 @@ document.addEventListener('DOMContentLoaded', function() {
                             x: { min: 0, max: xauusdData.labels.length },
                             y: { min: 'original', max: 'original' }
                         }
+                    },
+                    onZoomComplete: function({chart}) {
+                        if (typeof updateDrawingOverlay === 'function') {
+                            updateDrawingOverlay();
+                        }
+                    },
+                    onPanComplete: function({chart}) {
+                        if (typeof updateDrawingOverlay === 'function') {
+                            updateDrawingOverlay();
+                        }
                     }
                 },
                 scales: {
