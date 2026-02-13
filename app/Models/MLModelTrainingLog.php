@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MLModelTrainingLog extends Model
 {
+    protected $table = 'ml_model_training_logs';
+    
     protected $fillable = [
         'ml_model_id',
         'phase',

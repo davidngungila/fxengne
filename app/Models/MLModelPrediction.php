@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MLModelPrediction extends Model
 {
+    protected $table = 'ml_model_predictions';
+    
     protected $fillable = [
         'ml_model_id',
         'instrument',

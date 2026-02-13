@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MLModel extends Model
 {
+    protected $table = 'ml_models';
+    
     protected $fillable = [
         'user_id',
         'name',
