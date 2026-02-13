@@ -215,18 +215,39 @@
         </div>
     </div>
 
-    <!-- LAYER 4: XAUUSD Live Chart -->
+    <!-- LAYER 4: XAUUSD Live Chart (QOS WebSocket) -->
     <div class="card">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold text-gray-900">XAUUSD Live Chart</h2>
-            <div class="flex items-center space-x-4 px-5 py-3 bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg border border-gray-700">
-                <div class="flex items-center space-x-2">
-                    <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                    <span class="text-xs font-medium text-green-400">Live</span>
+            <div class="flex items-center space-x-4">
+                @if($qosEnabled ?? false)
+                <div class="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-lg">
+                    <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" id="qosStatus"></div>
+                    <span class="text-xs font-medium text-green-700">QOS Connected</span>
                 </div>
-                <div class="border-l border-gray-600 pl-4">
-                    <span class="text-xs text-gray-400">Price:</span>
-                    <span class="text-xl font-bold text-white ml-2" id="xauusdPrice">${{ number_format($currentPrice, 2) }}</span>
+                @else
+                <div class="flex items-center space-x-2 px-3 py-1 bg-yellow-100 rounded-lg">
+                    <div class="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
+                    <span class="text-xs font-medium text-yellow-700">QOS Not Configured</span>
+                </div>
+                @endif
+                <div class="flex items-center space-x-4 px-5 py-3 bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg border border-gray-700">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-xs font-medium text-green-400">Live</span>
+                    </div>
+                    <div class="border-l border-gray-600 pl-4">
+                        <span class="text-xs text-gray-400">Price:</span>
+                        <span class="text-xl font-bold text-white ml-2 transition-all duration-300" id="xauusdPrice">${{ number_format($currentPrice, 2) }}</span>
+                    </div>
+                    <div class="border-l border-gray-600 pl-4">
+                        <span class="text-xs text-gray-400">Bid:</span>
+                        <span class="text-sm font-semibold text-green-400 ml-2" id="xauusdBid">--</span>
+                    </div>
+                    <div class="border-l border-gray-600 pl-4">
+                        <span class="text-xs text-gray-400">Ask:</span>
+                        <span class="text-sm font-semibold text-red-400 ml-2" id="xauusdAsk">--</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -444,8 +465,150 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePriceLadder(newPrice);
     }
     
-    // Fetch live XAUUSD price
+    // Initialize QOS WebSocket Connection
+    function initQosWebSocket() {
+        if (!qosEnabled || !qosWsUrl) {
+            console.log('QOS not configured');
+            return;
+        }
+
+        try {
+            qosWebSocket = new WebSocket(qosWsUrl);
+
+            qosWebSocket.onopen = function() {
+                console.log('QOS WebSocket connected');
+                qosConnected = true;
+                updateQosStatus(true);
+                
+                // Subscribe to XAUUSD
+                const subscribeMessage = {
+                    action: 'subscribe',
+                    symbol: 'XAUUSD',
+                    type: 'tick'
+                };
+                qosWebSocket.send(JSON.stringify(subscribeMessage));
+                
+                addJournalEntry(new Date().toLocaleTimeString(), 'QOS CONNECTED', 'QOS WebSocket connection established', 'success');
+            };
+
+            qosWebSocket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleQosData(data);
+                } catch (e) {
+                    console.error('Error parsing QOS data:', e);
+                }
+            };
+
+            qosWebSocket.onerror = function(error) {
+                console.error('QOS WebSocket error:', error);
+                updateQosStatus(false);
+                qosConnected = false;
+            };
+
+            qosWebSocket.onclose = function() {
+                console.log('QOS WebSocket disconnected');
+                qosConnected = false;
+                updateQosStatus(false);
+                
+                // Attempt to reconnect after 5 seconds
+                setTimeout(initQosWebSocket, 5000);
+            };
+        } catch (error) {
+            console.error('Error initializing QOS WebSocket:', error);
+        }
+    }
+
+    // Handle QOS data
+    function handleQosData(data) {
+        if (data.symbol === 'XAUUSD' || data.symbol === 'XAU/USD' || data.instrument === 'XAUUSD') {
+            // Update price from QOS tick data
+            if (data.bid && data.ask) {
+                const bid = parseFloat(data.bid);
+                const ask = parseFloat(data.ask);
+                const mid = (bid + ask) / 2;
+                
+                updatePrice(mid);
+                const bidEl = document.getElementById('xauusdBid');
+                const askEl = document.getElementById('xauusdAsk');
+                if (bidEl) bidEl.textContent = '$' + bid.toFixed(2);
+                if (askEl) askEl.textContent = '$' + ask.toFixed(2);
+            } else if (data.price) {
+                // Single price update
+                updatePrice(parseFloat(data.price));
+            } else if (data.last) {
+                // Last price
+                updatePrice(parseFloat(data.last));
+            }
+            
+            // Update chart if candle data
+            if (data.type === 'candle' && typeof xauusdChart !== 'undefined') {
+                updateChartWithCandle(data);
+            }
+        }
+    }
+
+    // Update QOS connection status
+    function updateQosStatus(connected) {
+        const statusEl = document.getElementById('qosStatus');
+        if (statusEl) {
+            if (connected) {
+                statusEl.className = 'w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse';
+            } else {
+                statusEl.className = 'w-2.5 h-2.5 bg-red-500 rounded-full';
+            }
+        }
+    }
+
+    // Update chart with new candle
+    function updateChartWithCandle(candleData) {
+        if (typeof xauusdChart === 'undefined' || typeof xauusdData === 'undefined') return;
+        
+        const newCandle = {
+            open: parseFloat(candleData.open || candleData.o),
+            high: parseFloat(candleData.high || candleData.h),
+            low: parseFloat(candleData.low || candleData.l),
+            close: parseFloat(candleData.close || candleData.c),
+            time: new Date(candleData.time || candleData.t)
+        };
+        
+        // Update last candle or add new one
+        if (xauusdData.candles.length > 0) {
+            const lastCandle = xauusdData.candles[xauusdData.candles.length - 1];
+            if (lastCandle.time.getTime() === newCandle.time.getTime()) {
+                // Update existing candle
+                Object.assign(lastCandle, newCandle);
+            } else {
+                // Add new candle
+                xauusdData.candles.push(newCandle);
+                xauusdData.labels.push(newCandle.time.toLocaleTimeString('en-US', { hour12: false }));
+                
+                // Keep only last 500 candles
+                if (xauusdData.candles.length > 500) {
+                    xauusdData.candles.shift();
+                    xauusdData.labels.shift();
+                }
+            }
+        } else {
+            xauusdData.candles.push(newCandle);
+            xauusdData.labels.push(newCandle.time.toLocaleTimeString('en-US', { hour12: false }));
+        }
+        
+        if (typeof calculateEMAs === 'function') {
+            calculateEMAs();
+        }
+        if (xauusdChart) {
+            xauusdChart.update('none');
+        }
+    }
+
+    // Fetch live XAUUSD price (fallback if QOS not available)
     async function fetchLivePrice() {
+        if (qosConnected) {
+            // QOS is handling updates, skip API call
+            return;
+        }
+        
         try {
             const response = await fetch(`${API_BASE_URL}/market/prices?instruments=XAU_USD`);
             const result = await response.json();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\EconomicCalendarService;
 use App\Services\LiveMarketSignalService;
 use App\Services\OandaService;
+use App\Services\QosService;
 use App\Models\MLModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,12 +16,14 @@ class MarketToolsController extends Controller
     protected $calendarService;
     protected $signalService;
     protected $oandaService;
+    protected $qosService;
 
-    public function __construct(EconomicCalendarService $calendarService, LiveMarketSignalService $signalService, OandaService $oandaService)
+    public function __construct(EconomicCalendarService $calendarService, LiveMarketSignalService $signalService, OandaService $oandaService, QosService $qosService)
     {
         $this->calendarService = $calendarService;
         $this->signalService = $signalService;
         $this->oandaService = $oandaService;
+        $this->qosService = $qosService;
     }
 
     public function index()
@@ -94,6 +97,7 @@ class MarketToolsController extends Controller
     public function liveMarket()
     {
         $oandaEnabled = !empty(config('services.oanda.api_key'));
+        $qosEnabled = $this->qosService->isConfigured();
         
         // Get today's critical event (CPI)
         $events = [
@@ -221,6 +225,9 @@ class MarketToolsController extends Controller
 
         return view('market-tools.live-market', [
             'oandaEnabled' => $oandaEnabled,
+            'qosEnabled' => $qosEnabled,
+            'qosWsUrl' => $qosEnabled ? $this->qosService->getWebSocketUrl() : null,
+            'qosApiKey' => $qosEnabled ? $this->qosService->getApiKey() : null,
             'goldAlphaSignal' => $goldAlphaSignal,
             'cpiEvent' => $mostImportantEvent,
             'eventSignal' => $eventSignal,
