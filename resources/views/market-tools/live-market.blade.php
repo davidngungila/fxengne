@@ -217,38 +217,59 @@
 
     <!-- LAYER 4: XAUUSD Live Chart (QOS WebSocket) -->
     <div class="card">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-900">XAUUSD Live Chart</h2>
-            <div class="flex items-center space-x-4">
-                @if($qosEnabled ?? false)
-                <div class="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-lg">
-                    <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" id="qosStatus"></div>
-                    <span class="text-xs font-medium text-green-700">QOS Connected</span>
+        <div class="flex flex-col space-y-4 mb-4">
+            <!-- Header with timeframe buttons -->
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-900">XAUUSD Live Chart</h2>
+                <div class="flex items-center space-x-4">
+                    @if($qosEnabled ?? false)
+                    <div class="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-lg">
+                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" id="qosStatus"></div>
+                        <span class="text-xs font-medium text-green-700">QOS Connected</span>
+                    </div>
+                    @else
+                    <div class="flex items-center space-x-2 px-3 py-1 bg-yellow-100 rounded-lg">
+                        <div class="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
+                        <span class="text-xs font-medium text-yellow-700">QOS Not Configured</span>
+                    </div>
+                    @endif
+                    <div class="flex items-center space-x-4 px-5 py-3 bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg border border-gray-700">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-xs font-medium text-green-400">Live</span>
+                        </div>
+                        <div class="border-l border-gray-600 pl-4 flex items-center space-x-2">
+                            <span class="text-xs text-gray-400">Price:</span>
+                            <span class="text-xl font-bold text-white transition-all duration-300" id="xauusdPrice">${{ number_format($currentPrice, 2) }}</span>
+                            <span id="priceMovement" class="text-lg transition-all duration-300"></span>
+                        </div>
+                        <div class="border-l border-gray-600 pl-4">
+                            <span class="text-xs text-gray-400">Change:</span>
+                            <span class="text-sm font-semibold ml-2" id="priceChange">--</span>
+                        </div>
+                        <div class="border-l border-gray-600 pl-4">
+                            <span class="text-xs text-gray-400">Bid:</span>
+                            <span class="text-sm font-semibold text-green-400 ml-2" id="xauusdBid">--</span>
+                        </div>
+                        <div class="border-l border-gray-600 pl-4">
+                            <span class="text-xs text-gray-400">Ask:</span>
+                            <span class="text-sm font-semibold text-red-400 ml-2" id="xauusdAsk">--</span>
+                        </div>
+                    </div>
                 </div>
-                @else
-                <div class="flex items-center space-x-2 px-3 py-1 bg-yellow-100 rounded-lg">
-                    <div class="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
-                    <span class="text-xs font-medium text-yellow-700">QOS Not Configured</span>
-                </div>
-                @endif
-                <div class="flex items-center space-x-4 px-5 py-3 bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg border border-gray-700">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-xs font-medium text-green-400">Live</span>
-                    </div>
-                    <div class="border-l border-gray-600 pl-4">
-                        <span class="text-xs text-gray-400">Price:</span>
-                        <span class="text-xl font-bold text-white ml-2 transition-all duration-300" id="xauusdPrice">${{ number_format($currentPrice, 2) }}</span>
-                    </div>
-                    <div class="border-l border-gray-600 pl-4">
-                        <span class="text-xs text-gray-400">Bid:</span>
-                        <span class="text-sm font-semibold text-green-400 ml-2" id="xauusdBid">--</span>
-                    </div>
-                    <div class="border-l border-gray-600 pl-4">
-                        <span class="text-xs text-gray-400">Ask:</span>
-                        <span class="text-sm font-semibold text-red-400 ml-2" id="xauusdAsk">--</span>
-                    </div>
-                </div>
+            </div>
+            
+            <!-- Timeframe Selector -->
+            <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+                <span class="text-xs font-medium text-gray-600 px-3">Timeframe:</span>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 bg-blue-600 text-white" data-timeframe="M1">1M</button>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="M5">5M</button>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="M15">15M</button>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="M30">30M</button>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="H1">1H</button>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="H4">4H</button>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="D">1D</button>
+                <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="W">1W</button>
             </div>
         </div>
         <div class="relative" style="height: 500px; background-color: var(--trading-bg-dark-navy); border-radius: 8px;">
@@ -381,6 +402,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ema21: [],
         ema200: []
     };
+    let currentTimeframe = 'M1';
+    let previousPrice = currentPrice;
+    let priceChange = 0;
+    let priceChangePercent = 0;
     
     // Update countdown timer
     function updateCountdown() {
@@ -473,21 +498,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
     }
     
-    // Update price display
+    // Update price display with movement indicators
     function updatePrice(newPrice) {
         const priceEl = document.getElementById('xauusdPrice');
+        const movementEl = document.getElementById('priceMovement');
+        const changeEl = document.getElementById('priceChange');
+        
         if (priceEl) {
-            const oldPrice = parseFloat(priceEl.textContent.replace('$', '')) || newPrice;
+            const oldPrice = previousPrice;
             priceEl.textContent = '$' + newPrice.toFixed(2);
             
-            // Add price change animation
-            if (newPrice > oldPrice) {
-                priceEl.classList.add('text-green-400');
-                setTimeout(() => priceEl.classList.remove('text-green-400'), 500);
-            } else if (newPrice < oldPrice) {
-                priceEl.classList.add('text-red-400');
-                setTimeout(() => priceEl.classList.remove('text-red-400'), 500);
+            // Calculate price change
+            priceChange = newPrice - oldPrice;
+            priceChangePercent = oldPrice > 0 ? ((priceChange / oldPrice) * 100) : 0;
+            
+            // Update price change display
+            if (changeEl) {
+                const sign = priceChange >= 0 ? '+' : '';
+                changeEl.textContent = `${sign}${priceChange.toFixed(2)} (${sign}${priceChangePercent.toFixed(2)}%)`;
+                changeEl.className = `text-sm font-semibold ml-2 ${priceChange >= 0 ? 'text-green-400' : 'text-red-400'}`;
             }
+            
+            // Update movement indicator
+            if (movementEl) {
+                if (newPrice > oldPrice) {
+                    movementEl.innerHTML = '<svg class="w-5 h-5 text-green-400 animate-bounce" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>';
+                    priceEl.classList.remove('text-white', 'text-red-400');
+                    priceEl.classList.add('text-green-400');
+                    setTimeout(() => {
+                        priceEl.classList.remove('text-green-400');
+                        priceEl.classList.add('text-white');
+                    }, 500);
+                } else if (newPrice < oldPrice) {
+                    movementEl.innerHTML = '<svg class="w-5 h-5 text-red-400 animate-bounce" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>';
+                    priceEl.classList.remove('text-white', 'text-green-400');
+                    priceEl.classList.add('text-red-400');
+                    setTimeout(() => {
+                        priceEl.classList.remove('text-red-400');
+                        priceEl.classList.add('text-white');
+                    }, 500);
+                } else {
+                    movementEl.innerHTML = '';
+                    priceEl.classList.remove('text-green-400', 'text-red-400');
+                    priceEl.classList.add('text-white');
+                }
+            }
+            
+            previousPrice = newPrice;
         }
         updatePriceLadder(newPrice);
         
@@ -780,19 +837,59 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(() => updateModelStatus(false));
     }
     
-    // Initialize XAUUSD Chart
-    function initXAUUSDChart() {
-        const ctx = document.getElementById('xauusdChart');
-        if (!ctx) return;
-        
-        // Generate initial sample data (last 100 candles)
+    // Load chart data for timeframe
+    async function loadChartData(timeframe) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/market/xauusd/candles?granularity=${timeframe}&count=500`);
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                const candles = result.data.filter(c => c.complete).map(c => ({
+                    open: parseFloat(c.mid.o),
+                    high: parseFloat(c.mid.h),
+                    low: parseFloat(c.mid.l),
+                    close: parseFloat(c.mid.c),
+                    time: new Date(c.time)
+                }));
+                
+                xauusdData.candles = candles;
+                xauusdData.labels = candles.map(c => formatTimeLabel(c.time, timeframe));
+                
+                // Calculate EMAs
+                calculateEMAs();
+                
+                // Update chart
+                if (xauusdChart) {
+                    updateChartData();
+                } else {
+                    initXAUUSDChart();
+                }
+            } else {
+                // Fallback to generated data
+                generateSampleData(timeframe);
+                initXAUUSDChart();
+            }
+        } catch (error) {
+            console.error('Error loading chart data:', error);
+            // Fallback to generated data
+            generateSampleData(timeframe);
+            initXAUUSDChart();
+        }
+    }
+    
+    // Generate sample data for fallback
+    function generateSampleData(timeframe) {
         const now = new Date();
         const initialCandles = [];
         const initialLabels = [];
         let basePrice = currentPrice;
         
-        for (let i = 99; i >= 0; i--) {
-            const time = new Date(now.getTime() - i * 60000); // 1 minute candles
+        // Calculate milliseconds per candle based on timeframe
+        const msPerCandle = getMsPerCandle(timeframe);
+        const count = 500;
+        
+        for (let i = count - 1; i >= 0; i--) {
+            const time = new Date(now.getTime() - i * msPerCandle);
             const change = (Math.random() - 0.5) * 2; // Random price movement
             const open = basePrice;
             const close = basePrice + change;
@@ -800,22 +897,73 @@ document.addEventListener('DOMContentLoaded', function() {
             const low = Math.min(open, close) - Math.random() * 0.5;
             
             initialCandles.push({ open, high, low, close, time });
-            initialLabels.push(time.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
+            initialLabels.push(formatTimeLabel(time, timeframe));
             basePrice = close;
         }
         
         xauusdData.candles = initialCandles;
         xauusdData.labels = initialLabels;
+    }
+    
+    // Get milliseconds per candle for timeframe
+    function getMsPerCandle(timeframe) {
+        const map = {
+            'M1': 60000,      // 1 minute
+            'M5': 300000,     // 5 minutes
+            'M15': 900000,    // 15 minutes
+            'M30': 1800000,   // 30 minutes
+            'H1': 3600000,    // 1 hour
+            'H4': 14400000,   // 4 hours
+            'D': 86400000,    // 1 day
+            'W': 604800000    // 1 week
+        };
+        return map[timeframe] || 60000;
+    }
+    
+    // Format time label based on timeframe
+    function formatTimeLabel(time, timeframe) {
+        const date = new Date(time);
+        if (timeframe === 'W') {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else if (timeframe === 'D') {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else if (timeframe === 'H4' || timeframe === 'H1') {
+            return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        } else {
+            return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        }
+    }
+    
+    // Update chart data
+    function updateChartData() {
+        if (!xauusdChart) return;
         
-        // Calculate EMAs
-        calculateEMAs();
+        xauusdChart.data.labels = xauusdData.labels;
+        if (xauusdChart.data.datasets.length >= 4) {
+            xauusdChart.data.datasets[0].data = xauusdData.candles.map(c => c.close);
+            xauusdChart.data.datasets[1].data = xauusdData.ema9;
+            xauusdChart.data.datasets[2].data = xauusdData.ema21;
+            xauusdChart.data.datasets[3].data = xauusdData.ema200;
+        }
+        xauusdChart.update('none');
+    }
+    
+    // Initialize XAUUSD Chart
+    function initXAUUSDChart() {
+        const ctx = document.getElementById('xauusdChart');
+        if (!ctx) return;
+        
+        // Calculate EMAs if not already calculated
+        if (xauusdData.ema9.length === 0) {
+            calculateEMAs();
+        }
         
         // Create datasets
         const datasets = [
             // Price line (for reference)
             {
                 label: 'Price',
-                data: initialCandles.map(c => c.close),
+                data: xauusdData.candles.map(c => c.close),
                 borderColor: 'rgba(255, 255, 255, 0.3)',
                 backgroundColor: 'transparent',
                 borderWidth: 1,
@@ -860,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
         xauusdChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: initialLabels,
+                labels: xauusdData.labels,
                 datasets: datasets
             },
             options: {
@@ -984,6 +1132,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Handle timeframe change
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const timeframe = this.getAttribute('data-timeframe');
+            
+            // Update active button
+            document.querySelectorAll('.timeframe-btn').forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white');
+                b.classList.add('text-gray-700', 'hover:bg-gray-200');
+            });
+            this.classList.remove('text-gray-700', 'hover:bg-gray-200');
+            this.classList.add('bg-blue-600', 'text-white');
+            
+            // Update timeframe
+            currentTimeframe = timeframe;
+            
+            // Reload chart data
+            loadChartData(timeframe);
+            
+            // Update QOS subscription if connected
+            if (qosWebSocket && qosWebSocket.readyState === WebSocket.OPEN) {
+                const subscribeMessage = {
+                    action: 'subscribe',
+                    symbol: 'XAUUSD',
+                    type: 'tick',
+                    timeframe: timeframe
+                };
+                qosWebSocket.send(JSON.stringify(subscribeMessage));
+            }
+        });
+    });
+    
     // Calculate EMAs
     function calculateEMAs() {
         const closes = xauusdData.candles.map(c => c.close);
@@ -1024,7 +1204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePriceLadder(currentPrice);
     updateCountdown();
     checkModelDashboard();
-    initXAUUSDChart();
+    loadChartData(currentTimeframe);
     
     // Update every 2 seconds
     setInterval(fetchLivePrice, 2000);
