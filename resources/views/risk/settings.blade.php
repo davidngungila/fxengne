@@ -133,7 +133,7 @@
                 </div>
             </div>
 
-    <div class="card">
+            <div class="card">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Risk Status</h3>
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">

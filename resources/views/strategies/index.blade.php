@@ -64,7 +64,7 @@
         </div>
 
         <div class="card">
-    <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Signals</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">127</p>
@@ -250,7 +250,7 @@
                 <div class="pt-3 border-t border-gray-200 flex space-x-2">
                     <a href="{{ route('strategies.performance') }}" class="btn btn-secondary flex-1 text-sm">View</a>
                     <a href="{{ route('strategies.backtesting') }}" class="btn btn-secondary flex-1 text-sm">Backtest</a>
-            </div>
+                </div>
             </div>
         </div>
     </div>

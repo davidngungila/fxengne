@@ -178,7 +178,7 @@
     </div>
 
     <!-- Recent Trades -->
-            <div class="card">
+    <div class="card">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Recent Trades</h3>
             <a href="{{ route('trading.history') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center">
@@ -188,20 +188,20 @@
                 </svg>
             </a>
         </div>
-                <div class="overflow-x-auto">
-                    <table class="table">
-                        <thead>
-                            <tr>
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
                         <th>Time</th>
                         <th>Instrument</th>
-                                <th>Type</th>
+                        <th>Type</th>
                         <th>Units</th>
-                                <th>Entry</th>
+                        <th>Entry</th>
                         <th>Current/Exit</th>
-                                <th>P/L</th>
+                        <th>P/L</th>
                         <th>Status</th>
-                            </tr>
-                        </thead>
+                    </tr>
+                </thead>
                 <tbody id="recentTrades">
                     @forelse($recentTrades as $trade)
                     <tr class="hover:bg-gray-50 transition-colors">
@@ -231,11 +231,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
                             <p>No recent trades</p>
-                                </td>
-                            </tr>
+                        </td>
+                    </tr>
                     @endforelse
-                        </tbody>
-                    </table>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <div class="card hover:shadow-lg transition-all transform hover:scale-105">
             <div class="flex items-center justify-between">
-        <div>
+                <div>
                     <p class="text-sm text-gray-600">Total Trades</p>
                     <p class="text-3xl font-bold text-gray-900 mt-1" id="totalTrades">{{ $totalTrades }}</p>
                     <p class="text-xs text-gray-500 mt-1">All Time</p>

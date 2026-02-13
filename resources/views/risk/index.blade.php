@@ -124,7 +124,7 @@
                 <canvas id="drawdownChart"></canvas>
             </div>
         </div>
-        
+
         <div class="card">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Risk Exposure</h3>
             <div class="space-y-4">
