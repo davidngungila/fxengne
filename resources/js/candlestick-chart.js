@@ -299,3 +299,5 @@ if (typeof window !== 'undefined') {
     window.CandlestickChart = CandlestickChart;
 }
 
+
+

@@ -343,3 +343,5 @@ class TradingBotService
     }
 }
 
+
+

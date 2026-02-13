@@ -147,3 +147,5 @@ The badge styles automatically use the professional trading colors:
 - `resources/js/chart-config.js` - Pre-configured chart options
 - `resources/css/app.css` - CSS variables and badge styles
 
+
+

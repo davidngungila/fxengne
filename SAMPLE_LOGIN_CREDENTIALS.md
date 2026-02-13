@@ -42,3 +42,5 @@ php artisan db:seed
 ⚠️ **IMPORTANT:** These are sample credentials for development/testing purposes only. 
 Change all passwords in production environments!
 
+
+

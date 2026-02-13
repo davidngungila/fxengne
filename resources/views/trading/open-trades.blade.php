@@ -29,11 +29,11 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="card">
+        <div class="card hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Open</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalOpen">0</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalOpen">{{ $totalOpen }}</p>
                 </div>
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Unrealized P/L</p>
-                    <p class="text-2xl font-bold mt-1" id="unrealizedPL">$0.00</p>
+                    <p class="text-2xl font-bold mt-1 {{ $unrealizedPL >= 0 ? 'text-green-600' : 'text-red-600' }}" id="unrealizedPL">${{ number_format($unrealizedPL, 2) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Exposure</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalExposure">$0.00</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalExposure">${{ number_format($totalExposure, 2) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Margin Used</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="marginUsed">$0.00</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="marginUsed">${{ number_format($marginUsed, 2) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,15 +109,41 @@
                     </tr>
                 </thead>
                 <tbody id="openTradesTable">
-                    <tr>
-                        <td colspan="10" class="text-center py-8 text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <p>Loading open trades...</p>
+                    @forelse($openTrades as $trade)
+                    <tr class="hover:bg-gray-50">
+                        <td class="font-medium">{{ $trade->formatted_instrument }}</td>
+                        <td>
+                            <span class="px-2 py-1 rounded text-xs font-medium {{ $trade->type === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $trade->type }}
+                            </span>
+                        </td>
+                        <td class="font-mono text-sm">{{ number_format($trade->units, 0) }}</td>
+                        <td class="font-mono text-sm">{{ number_format($trade->entry_price, 5) }}</td>
+                        <td class="font-mono text-sm font-semibold">{{ number_format($trade->current_price ?? $trade->entry_price, 5) }}</td>
+                        <td class="font-mono text-sm text-red-600">{{ $trade->stop_loss ? number_format($trade->stop_loss, 5) : '--' }}</td>
+                        <td class="font-mono text-sm text-green-600">{{ $trade->take_profit ? number_format($trade->take_profit, 5) : '--' }}</td>
+                        <td class="font-semibold {{ $trade->unrealized_pl >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $trade->unrealized_pl >= 0 ? '+' : '' }}${{ number_format($trade->unrealized_pl, 2) }}
+                        </td>
+                        <td class="font-semibold {{ $trade->unrealized_pl >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $trade->pl_percentage >= 0 ? '+' : '' }}{{ number_format($trade->pl_percentage, 2) }}%
+                        </td>
+                        <td>
+                            <button onclick="closeTrade('{{ $trade->oanda_trade_id ?? $trade->id }}')" class="text-sm px-3 py-1 rounded-lg font-medium transition-colors bg-red-100 text-red-700 hover:bg-red-200">
+                                Close
+                            </button>
                         </td>
                     </tr>
+                    @empty
+                    <tr>
+                        <td colspan="10" class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p>No open trades</p>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -157,12 +183,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateSummary() {
         const total = openTrades.length;
         const unrealizedPL = openTrades.reduce((sum, t) => sum + parseFloat(t.unrealizedPL || 0), 0);
-        const totalExposure = openTrades.reduce((sum, t) => sum + Math.abs(parseFloat(t.currentUnits || 0) * parseFloat(t.price || 0)), 0);
+        const totalExposure = openTrades.reduce((sum, t) => {
+            const units = Math.abs(parseFloat(t.currentUnits || t.units || 0));
+            const price = parseFloat(t.currentPrice || t.openPrice || 0);
+            return sum + (units * price);
+        }, 0);
         const marginUsed = openTrades.reduce((sum, t) => sum + parseFloat(t.marginUsed || 0), 0);
 
         document.getElementById('totalOpen').textContent = total;
-        document.getElementById('unrealizedPL').textContent = '$' + unrealizedPL.toFixed(2);
-        document.getElementById('unrealizedPL').className = unrealizedPL >= 0 
+        const plEl = document.getElementById('unrealizedPL');
+        plEl.textContent = '$' + unrealizedPL.toFixed(2);
+        plEl.className = unrealizedPL >= 0 
             ? 'text-2xl font-bold text-green-600 mt-1' 
             : 'text-2xl font-bold text-red-600 mt-1';
         document.getElementById('totalExposure').textContent = '$' + totalExposure.toFixed(2);
@@ -189,26 +220,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tbody.innerHTML = trades.map(trade => {
             const pl = parseFloat(trade.unrealizedPL || 0);
-            const plPercent = trade.openPrice ? ((pl / (Math.abs(trade.currentUnits || 0) * trade.openPrice)) * 100) : 0;
+            const units = Math.abs(trade.currentUnits || trade.units || 0);
+            const entryPrice = parseFloat(trade.openPrice || 0);
+            const plPercent = entryPrice > 0 ? ((pl / (units * entryPrice)) * 100) : 0;
             const plClass = pl >= 0 ? 'text-green-600' : 'text-red-600';
-            const type = trade.currentUnits > 0 ? 'BUY' : 'SELL';
+            const type = trade.type || (trade.currentUnits > 0 ? 'BUY' : 'SELL');
             const typeColor = type === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            const tradeId = trade.id || (trade.oanda_trade_id || '');
 
             return `
                 <tr class="hover:bg-gray-50">
-                    <td class="font-medium">${trade.instrument?.replace('_', '/') || 'N/A'}</td>
+                    <td class="font-medium">${(trade.instrument || '').replace('_', '/')}</td>
                     <td>
                         <span class="px-2 py-1 rounded text-xs font-medium ${typeColor}">${type}</span>
                     </td>
-                    <td class="font-mono text-sm">${Math.abs(trade.currentUnits || 0)}</td>
-                    <td class="font-mono text-sm">${parseFloat(trade.openPrice || 0).toFixed(5)}</td>
-                    <td class="font-mono text-sm font-semibold">${parseFloat(trade.currentPrice || trade.price || 0).toFixed(5)}</td>
+                    <td class="font-mono text-sm">${units.toLocaleString()}</td>
+                    <td class="font-mono text-sm">${entryPrice.toFixed(5)}</td>
+                    <td class="font-mono text-sm font-semibold">${parseFloat(trade.currentPrice || trade.price || entryPrice).toFixed(5)}</td>
                     <td class="font-mono text-sm text-red-600">${trade.stopLossOrder?.price ? parseFloat(trade.stopLossOrder.price).toFixed(5) : '--'}</td>
                     <td class="font-mono text-sm text-green-600">${trade.takeProfitOrder?.price ? parseFloat(trade.takeProfitOrder.price).toFixed(5) : '--'}</td>
                     <td class="font-semibold ${plClass}">${pl >= 0 ? '+' : ''}$${pl.toFixed(2)}</td>
                     <td class="font-semibold ${plClass}">${plPercent >= 0 ? '+' : ''}${plPercent.toFixed(2)}%</td>
                     <td>
-                        <button onclick="closeTrade('${trade.id}')" class="text-sm px-3 py-1 rounded-lg font-medium transition-colors bg-red-100 text-red-700 hover:bg-red-200">
+                        <button onclick="closeTrade('${tradeId}')" class="text-sm px-3 py-1 rounded-lg font-medium transition-colors bg-red-100 text-red-700 hover:bg-red-200">
                             Close
                         </button>
                     </td>

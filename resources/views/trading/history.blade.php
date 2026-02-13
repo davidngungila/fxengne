@@ -13,10 +13,10 @@
         </div>
         <div class="flex items-center space-x-3">
             <select id="dateRange" class="form-input text-sm">
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
+                <option value="all" {{ $filters['date_range'] === 'all' ? 'selected' : '' }}>All Time</option>
+                <option value="today" {{ $filters['date_range'] === 'today' ? 'selected' : '' }}>Today</option>
+                <option value="week" {{ $filters['date_range'] === 'week' ? 'selected' : '' }}>This Week</option>
+                <option value="month" {{ $filters['date_range'] === 'month' ? 'selected' : '' }}>This Month</option>
             </select>
             <button id="exportHistory" class="btn btn-secondary">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,11 +29,11 @@
 
     <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="card">
+        <div class="card hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Trades</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalTrades">0</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalTrades">{{ $totalTrades }}</p>
                 </div>
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Winning Trades</p>
-                    <p class="text-2xl font-bold text-green-600 mt-1" id="winningTrades">0</p>
+                    <p class="text-2xl font-bold text-green-600 mt-1" id="winningTrades">{{ $winningTrades }}</p>
                 </div>
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Losing Trades</p>
-                    <p class="text-2xl font-bold text-red-600 mt-1" id="losingTrades">0</p>
+                    <p class="text-2xl font-bold text-red-600 mt-1" id="losingTrades">{{ $losingTrades }}</p>
                 </div>
                 <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Profit</p>
-                    <p class="text-2xl font-bold mt-1" id="totalProfit">$0.00</p>
+                    <p class="text-2xl font-bold mt-1 {{ $totalProfit >= 0 ? 'text-green-600' : 'text-red-600' }}" id="totalProfit">${{ number_format($totalProfit, 2) }}</p>
                 </div>
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,16 +90,16 @@
     <div class="card">
         <div class="flex items-center space-x-4">
             <select id="filterInstrument" class="form-input text-sm">
-                <option value="all">All Instruments</option>
-                <option value="EUR_USD">EUR/USD</option>
-                <option value="GBP_USD">GBP/USD</option>
-                <option value="USD_JPY">USD/JPY</option>
-                <option value="XAU_USD">XAU/USD</option>
+                <option value="all" {{ $filters['instrument'] === 'all' ? 'selected' : '' }}>All Instruments</option>
+                <option value="EUR_USD" {{ $filters['instrument'] === 'EUR_USD' ? 'selected' : '' }}>EUR/USD</option>
+                <option value="GBP_USD" {{ $filters['instrument'] === 'GBP_USD' ? 'selected' : '' }}>GBP/USD</option>
+                <option value="USD_JPY" {{ $filters['instrument'] === 'USD_JPY' ? 'selected' : '' }}>USD/JPY</option>
+                <option value="XAU_USD" {{ $filters['instrument'] === 'XAU_USD' ? 'selected' : '' }}>XAU/USD</option>
             </select>
             <select id="filterResult" class="form-input text-sm">
-                <option value="all">All Results</option>
-                <option value="win">Winning</option>
-                <option value="loss">Losing</option>
+                <option value="all" {{ $filters['result'] === 'all' ? 'selected' : '' }}>All Results</option>
+                <option value="win" {{ $filters['result'] === 'win' ? 'selected' : '' }}>Winning</option>
+                <option value="loss" {{ $filters['result'] === 'loss' ? 'selected' : '' }}>Losing</option>
             </select>
             <input type="text" id="searchHistory" placeholder="Search..." class="form-input text-sm flex-1">
         </div>
@@ -124,18 +124,70 @@
                     </tr>
                 </thead>
                 <tbody id="historyTable">
-                    <tr>
-                        <td colspan="10" class="text-center py-8 text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <p>Loading trade history...</p>
+                    @forelse($trades as $trade)
+                    <tr class="hover:bg-gray-50">
+                        <td class="text-sm text-gray-600">{{ $trade->closed_at->format('M d, Y H:i') }}</td>
+                        <td class="font-medium">{{ $trade->formatted_instrument }}</td>
+                        <td>
+                            <span class="px-2 py-1 rounded text-xs font-medium {{ $trade->type === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $trade->type }}
+                            </span>
+                        </td>
+                        <td class="font-mono text-sm">{{ number_format($trade->units, 0) }}</td>
+                        <td class="font-mono text-sm">{{ number_format($trade->entry_price, 5) }}</td>
+                        <td class="font-mono text-sm">{{ number_format($trade->exit_price ?? $trade->entry_price, 5) }}</td>
+                        <td class="text-sm text-gray-600">{{ $trade->duration ? $trade->duration . 'm' : '--' }}</td>
+                        <td class="font-semibold {{ $trade->realized_pl >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $trade->realized_pl >= 0 ? '+' : '' }}${{ number_format($trade->realized_pl, 2) }}
+                        </td>
+                        <td class="font-semibold {{ $trade->realized_pl >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ $trade->pl_percentage >= 0 ? '+' : '' }}{{ number_format($trade->pl_percentage, 2) }}%
+                        </td>
+                        <td>
+                            <button class="text-blue-600 hover:text-blue-700 text-sm font-medium">View</button>
                         </td>
                     </tr>
+                    @empty
+                    <tr>
+                        <td colspan="10" class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p>No trade history found</p>
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+        @if($trades->hasPages())
+        <div class="mt-4 flex items-center justify-between">
+            <div class="text-sm text-gray-600">
+                Showing {{ $trades->firstItem() }} to {{ $trades->lastItem() }} of {{ $trades->total() }} results
+            </div>
+            <div class="flex space-x-2">
+                @if($trades->onFirstPage())
+                    <span class="px-3 py-1 text-sm text-gray-400 cursor-not-allowed">Previous</span>
+                @else
+                    <a href="{{ $trades->previousPageUrl() }}" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Previous</a>
+                @endif
+                
+                @foreach($trades->getUrlRange(1, $trades->lastPage()) as $page => $url)
+                    @if($page == $trades->currentPage())
+                        <span class="px-3 py-1 text-sm bg-blue-600 text-white rounded">{{ $page }}</span>
+                    @else
+                        <a href="{{ $url }}" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">{{ $page }}</a>
+                    @endif
+                @endforeach
+                
+                @if($trades->hasMorePages())
+                    <a href="{{ $trades->nextPageUrl() }}" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">Next</a>
+                @else
+                    <span class="px-3 py-1 text-sm text-gray-400 cursor-not-allowed">Next</span>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 
@@ -161,18 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateStatistics() {
-        const total = tradeHistory.length;
-        const winning = tradeHistory.filter(t => parseFloat(t.realizedPL || 0) > 0).length;
-        const losing = tradeHistory.filter(t => parseFloat(t.realizedPL || 0) < 0).length;
-        const totalProfit = tradeHistory.reduce((sum, t) => sum + parseFloat(t.realizedPL || 0), 0);
-
-        document.getElementById('totalTrades').textContent = total;
-        document.getElementById('winningTrades').textContent = winning;
-        document.getElementById('losingTrades').textContent = losing;
-        document.getElementById('totalProfit').textContent = '$' + totalProfit.toFixed(2);
-        document.getElementById('totalProfit').className = totalProfit >= 0 
-            ? 'text-2xl font-bold text-green-600 mt-1' 
-            : 'text-2xl font-bold text-red-600 mt-1';
+        // Statistics are already loaded from server, no need to recalculate
+        // This function can be used for client-side filtering if needed
     }
 
     function renderHistory(filteredHistory = null) {
@@ -236,11 +278,30 @@ document.addEventListener('DOMContentLoaded', function() {
         renderHistory(filtered);
     }
 
+    // Apply filters by submitting form
+    function applyFilters() {
+        const dateRange = document.getElementById('dateRange').value;
+        const instrument = document.getElementById('filterInstrument').value;
+        const result = document.getElementById('filterResult').value;
+        const search = document.getElementById('searchHistory').value;
+        
+        const params = new URLSearchParams();
+        if (dateRange !== 'all') params.append('date_range', dateRange);
+        if (instrument !== 'all') params.append('instrument', instrument);
+        if (result !== 'all') params.append('result', result);
+        if (search) params.append('search', search);
+        
+        window.location.href = '{{ route("trading.history") }}?' + params.toString();
+    }
+
+    document.getElementById('dateRange').addEventListener('change', applyFilters);
     document.getElementById('filterInstrument').addEventListener('change', applyFilters);
     document.getElementById('filterResult').addEventListener('change', applyFilters);
-    document.getElementById('searchHistory').addEventListener('input', applyFilters);
-
-    loadHistory();
+    document.getElementById('searchHistory').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyFilters();
+        }
+    });
 });
 </script>
 @endpush
