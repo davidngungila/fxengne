@@ -459,10 +459,7 @@
         z-index: 10;
     }
     .drawing-overlay.active {
-        pointer-events: none; /* Don't block chart interactions */
-    }
-    #chartContainer.drawing-mode .drawing-overlay {
-        pointer-events: none; /* Allow chart interactions even in drawing mode */
+        pointer-events: all;
     }
     .drawing-line {
         stroke-width: 2;
@@ -492,16 +489,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Register zoom plugin - try multiple ways to load it
+    // Register zoom plugin if available
     if (typeof zoomPlugin !== 'undefined') {
         Chart.register(zoomPlugin);
     } else if (typeof window.ChartZoom !== 'undefined') {
         Chart.register(window.ChartZoom);
-    } else if (typeof Chart !== 'undefined' && Chart.registry && Chart.registry.get('zoom')) {
-        // Plugin already registered
-    } else {
-        // Load plugin from CDN if not available
-        console.warn('Zoom plugin not found, attempting to load...');
     }
     const API_BASE_URL = '{{ url("/api") }}';
     const currentPrice = {{ $currentPrice }};
@@ -1201,35 +1193,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Drawing on Chart - Use chart container instead of canvas to avoid blocking zoom/pan
+    // Drawing on Chart
     let drawingStartPos = null;
-    const chartContainer = document.getElementById('chartContainer');
+    const canvas = document.getElementById('xauusdChart');
     
-    chartContainer.addEventListener('mousedown', function(e) {
-        // Only start drawing if tool is selected and not right-click
-        if (!currentDrawingTool || e.button !== 0) return;
-        
-        // Check if we're clicking on the chart area (not toolbar)
-        const canvas = document.getElementById('xauusdChart');
-        if (!canvas) return;
-        
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        // Only draw if within canvas bounds
-        if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+    canvas.addEventListener('mousedown', function(e) {
+        if (!currentDrawingTool) return;
         
         isDrawing = true;
-        e.stopPropagation(); // Prevent chart pan when drawing
-        drawingStartPos = { x, y };
+        const rect = canvas.getBoundingClientRect();
+        drawingStartPos = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
     });
     
-    chartContainer.addEventListener('mousemove', function(e) {
+    canvas.addEventListener('mousemove', function(e) {
         if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
-        
-        const canvas = document.getElementById('xauusdChart');
-        if (!canvas) return;
         
         const rect = canvas.getBoundingClientRect();
         const currentPos = {
@@ -1237,15 +1217,11 @@ document.addEventListener('DOMContentLoaded', function() {
             y: e.clientY - rect.top
         };
         
-        e.stopPropagation(); // Prevent chart pan when drawing
         updateDrawingPreview(drawingStartPos, currentPos);
     });
     
-    chartContainer.addEventListener('mouseup', function(e) {
+    canvas.addEventListener('mouseup', function(e) {
         if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
-        
-        const canvas = document.getElementById('xauusdChart');
-        if (!canvas) return;
         
         const rect = canvas.getBoundingClientRect();
         const endPos = {
@@ -1253,20 +1229,9 @@ document.addEventListener('DOMContentLoaded', function() {
             y: e.clientY - rect.top
         };
         
-        e.stopPropagation(); // Prevent chart pan when drawing
         finishDrawing(drawingStartPos, endPos);
         isDrawing = false;
         drawingStartPos = null;
-    });
-    
-    // Also handle mouse leave to cancel drawing
-    chartContainer.addEventListener('mouseleave', function() {
-        if (isDrawing) {
-            isDrawing = false;
-            drawingStartPos = null;
-            const preview = drawingOverlay.querySelector('#drawing-preview');
-            if (preview) preview.remove();
-        }
     });
     
     function updateDrawingPreview(start, current) {
@@ -1318,14 +1283,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function updateDrawingOverlay() {
         if (!xauusdChart || !drawingOverlay) return;
-        
-        // Get chart dimensions
-        const canvas = document.getElementById('xauusdChart');
-        if (canvas) {
-            const rect = canvas.getBoundingClientRect();
-            drawingOverlay.setAttribute('width', rect.width);
-            drawingOverlay.setAttribute('height', rect.height);
-        }
         
         // Clear existing drawings (except preview)
         const existing = drawingOverlay.querySelectorAll('line, rect, text');
@@ -1625,25 +1582,23 @@ document.addEventListener('DOMContentLoaded', function() {
                             pinch: {
                                 enabled: true
                             },
-                            mode: 'x',
-                            drag: {
-                                enabled: false
-                            }
+                            mode: 'x'
                         },
                         pan: {
                             enabled: true,
                             mode: 'x',
                             modifierKey: null,
-                            threshold: 10,
-                            speed: 10,
-                            onPanStart: function({chart, event}) {
-                                // Allow panning even when drawing tools are active (unless actively drawing)
-                                return !isDrawing;
-                            }
+                            threshold: 10
                         },
                         limits: {
                             x: { min: 0, max: xauusdData.labels.length }
                         }
+                    },
+                    onZoomComplete: function({chart}) {
+                        updateDrawingOverlay();
+                    },
+                    onPanComplete: function({chart}) {
+                        updateDrawingOverlay();
                     }
                 },
                 scales: {
