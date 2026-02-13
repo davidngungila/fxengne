@@ -159,7 +159,11 @@ Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/users/{id}/details', [AdminController::class, 'getUserDetails'])->name('users.details');
+    Route::get('/users/{id}/edit', [AdminController::class, 'getUserForEdit'])->name('users.edit');
     Route::post('/users/{id}/role', [AdminController::class, 'updateUserRole'])->name('users.update-role');
+    Route::post('/users/{id}/update', [AdminController::class, 'updateUserDetails'])->name('users.update');
+    Route::post('/users/{id}/reset-password', [AdminController::class, 'resetPassword'])->name('users.reset-password');
+    Route::post('/users/{id}/set-password', [AdminController::class, 'setNewPassword'])->name('users.set-password');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
     Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('users.export');
 });

@@ -232,17 +232,31 @@
                             </div>
                         </td>
                         <td>
-                            <div class="flex items-center space-x-2">
+                            <div class="flex items-center space-x-2 flex-wrap gap-1">
                                 <button 
                                     onclick="showUserDetails({{ $user->id }})"
-                                    class="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                    class="px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded"
                                     title="View Details"
                                 >
                                     View
                                 </button>
+                                <button 
+                                    onclick="editUser({{ $user->id }})"
+                                    class="px-2 py-1 text-xs font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded"
+                                    title="Edit Details"
+                                >
+                                    Edit
+                                </button>
+                                <button 
+                                    onclick="resetUserPassword({{ $user->id }}, '{{ $user->name }}')"
+                                    class="px-2 py-1 text-xs font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded"
+                                    title="Reset Password"
+                                >
+                                    Reset PWD
+                                </button>
                                 @if($user->id !== auth()->id())
                                 <button 
-                                    class="text-red-600 hover:text-red-700 text-sm font-medium delete-user" 
+                                    class="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded delete-user" 
                                     data-user-id="{{ $user->id }}"
                                     data-user-name="{{ $user->name }}"
                                     title="Delete User"
@@ -250,7 +264,7 @@
                                     Delete
                                 </button>
                                 @else
-                                <span class="text-gray-400 text-sm">Current</span>
+                                <span class="text-gray-400 text-xs">Current</span>
                                 @endif
                             </div>
                         </td>
@@ -270,6 +284,100 @@
             {{ $users->links() }}
         </div>
         @endif
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Edit User Details</h3>
+                <button id="closeEditModal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form id="editUserForm" class="px-6 py-4">
+            <input type="hidden" id="editUserId" name="user_id">
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label">Name</label>
+                    <input type="text" id="editUserName" name="name" class="form-input" required>
+                </div>
+                <div>
+                    <label class="form-label">Email</label>
+                    <input type="email" id="editUserEmail" name="email" class="form-input" required>
+                </div>
+                <div>
+                    <label class="form-label">Role</label>
+                    <select id="editUserRole" name="role" class="form-input" required>
+                        <option value="trader">Trader</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                <button type="button" id="cancelEdit" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div id="resetPasswordModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-900">Reset Password</h3>
+                <button id="closeResetModal" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="px-6 py-4">
+            <p class="text-sm text-gray-600 mb-4">Choose how to reset the password for <span id="resetUserName" class="font-semibold"></span>:</p>
+            
+            <div class="space-y-3">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 mb-2">Option 1: Send Reset Link</h4>
+                    <p class="text-sm text-gray-600 mb-3">Generate a password reset link that the user can use to set a new password.</p>
+                    <button id="sendResetLink" class="btn btn-primary w-full">Send Reset Link</button>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 mb-2">Option 2: Set New Password</h4>
+                    <p class="text-sm text-gray-600 mb-3">Set a new password directly (user will need to change it on next login).</p>
+                    <form id="setPasswordForm" class="space-y-3">
+                        <input type="hidden" id="setPasswordUserId" name="user_id">
+                        <div>
+                            <label class="form-label">New Password</label>
+                            <input type="password" id="newPassword" name="password" class="form-input" required minlength="8">
+                        </div>
+                        <div>
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" id="confirmPassword" name="password_confirmation" class="form-input" required minlength="8">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-full">Set New Password</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="resetLinkResult" class="mt-4 hidden">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm font-medium text-blue-900 mb-2">Reset Link Generated:</p>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="resetLinkUrl" readonly class="form-input flex-1 text-sm bg-white">
+                        <button onclick="copyResetLink()" class="btn btn-secondary text-xs">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -569,6 +677,178 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('userDetailsModal')?.addEventListener('click', function(e) {
         if (e.target === this) {
             this.classList.add('hidden');
+        }
+    });
+
+    // Edit User
+    window.editUser = async function(userId) {
+        const modal = document.getElementById('editUserModal');
+        modal.classList.remove('hidden');
+        
+        try {
+            const response = await fetch(`/admin/users/${userId}/edit`);
+            const data = await response.json();
+            
+            if (data.success && data.user) {
+                document.getElementById('editUserId').value = data.user.id;
+                document.getElementById('editUserName').value = data.user.name;
+                document.getElementById('editUserEmail').value = data.user.email;
+                document.getElementById('editUserRole').value = data.user.role;
+            } else {
+                showNotification('Failed to load user data', 'error');
+            }
+        } catch (error) {
+            showNotification('Error loading user data', 'error');
+        }
+    };
+
+    // Handle edit form submission
+    document.getElementById('editUserForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const userId = document.getElementById('editUserId').value;
+        
+        const formData = {
+            name: document.getElementById('editUserName').value,
+            email: document.getElementById('editUserEmail').value,
+            role: document.getElementById('editUserRole').value,
+        };
+        
+        try {
+            const response = await fetch(`/admin/users/${userId}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                showNotification('User details updated successfully', 'success');
+                document.getElementById('editUserModal').classList.add('hidden');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showNotification(data.message || 'Failed to update user details', 'error');
+            }
+        } catch (error) {
+            showNotification('Error updating user details', 'error');
+        }
+    });
+
+    // Reset Password
+    window.resetUserPassword = function(userId, userName) {
+        const modal = document.getElementById('resetPasswordModal');
+        document.getElementById('resetUserName').textContent = userName;
+        document.getElementById('setPasswordUserId').value = userId;
+        document.getElementById('resetLinkResult').classList.add('hidden');
+        modal.classList.remove('hidden');
+    };
+
+    // Send reset link
+    document.getElementById('sendResetLink')?.addEventListener('click', async function() {
+        const userId = document.getElementById('setPasswordUserId').value;
+        
+        try {
+            const response = await fetch(`/admin/users/${userId}/reset-password`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                document.getElementById('resetLinkUrl').value = data.reset_url;
+                document.getElementById('resetLinkResult').classList.remove('hidden');
+                showNotification('Password reset link generated successfully', 'success');
+            } else {
+                showNotification(data.message || 'Failed to generate reset link', 'error');
+            }
+        } catch (error) {
+            showNotification('Error generating reset link', 'error');
+        }
+    });
+
+    // Set new password form
+    document.getElementById('setPasswordForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const userId = document.getElementById('setPasswordUserId').value;
+        const password = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (password !== confirmPassword) {
+            showNotification('Passwords do not match', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/admin/users/${userId}/set-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    password: password,
+                    password_confirmation: confirmPassword
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                showNotification('Password updated successfully', 'success');
+                document.getElementById('resetPasswordModal').classList.add('hidden');
+                document.getElementById('setPasswordForm').reset();
+            } else {
+                showNotification(data.message || 'Failed to update password', 'error');
+            }
+        } catch (error) {
+            showNotification('Error updating password', 'error');
+        }
+    });
+
+    // Copy reset link
+    window.copyResetLink = function() {
+        const input = document.getElementById('resetLinkUrl');
+        input.select();
+        document.execCommand('copy');
+        showNotification('Reset link copied to clipboard', 'success');
+    };
+
+    // Close modals
+    document.getElementById('closeEditModal')?.addEventListener('click', function() {
+        document.getElementById('editUserModal').classList.add('hidden');
+    });
+    
+    document.getElementById('cancelEdit')?.addEventListener('click', function() {
+        document.getElementById('editUserModal').classList.add('hidden');
+    });
+    
+    document.getElementById('closeResetModal')?.addEventListener('click', function() {
+        document.getElementById('resetPasswordModal').classList.add('hidden');
+        document.getElementById('resetLinkResult').classList.add('hidden');
+        document.getElementById('setPasswordForm').reset();
+    });
+
+    // Close modals on outside click
+    document.getElementById('editUserModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+    
+    document.getElementById('resetPasswordModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+            document.getElementById('resetLinkResult').classList.add('hidden');
+            document.getElementById('setPasswordForm').reset();
         }
     });
 

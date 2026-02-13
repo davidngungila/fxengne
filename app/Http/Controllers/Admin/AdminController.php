@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -266,6 +270,114 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully'
+        ]);
+    }
+
+    /**
+     * Reset user password - Send reset link
+     */
+    public function resetPassword($id)
+    {
+        $user = User::findOrFail($id);
+        
+        try {
+            // Generate password reset token
+            $token = Password::createToken($user);
+            
+            // You can send email here if needed
+            // For now, we'll return the token in response (for admin to share)
+            // In production, you might want to send email directly
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset link generated successfully',
+                'reset_url' => url('/reset-password?token=' . $token . '&email=' . urlencode($user->email)),
+                'token' => $token, // Only for admin reference
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate password reset link: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reset user password - Set new password directly
+     */
+    public function setNewPassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = User::findOrFail($id);
+        
+        // Prevent changing your own password this way
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please use your profile settings to change your own password'
+            ], 400);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully'
+        ]);
+    }
+
+    /**
+     * Update user details
+     */
+    public function updateUserDetails(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'role' => 'required|in:admin,trader',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->role = $request->role;
+        
+        // If email changed, unverify it
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+        
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User details updated successfully',
+            'user' => $user->fresh()
+        ]);
+    }
+
+    /**
+     * Get user for editing
+     */
+    public function getUserForEdit($id)
+    {
+        $user = User::findOrFail($id);
+        
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'email_verified_at' => $user->email_verified_at,
+                'has_2fa' => $user->hasTwoFactorEnabled(),
+            ]
         ]);
     }
 }
