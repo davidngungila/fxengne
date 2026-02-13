@@ -272,8 +272,74 @@
                 <button class="timeframe-btn px-3 py-1.5 text-xs font-medium rounded transition-all duration-200 text-gray-700 hover:bg-gray-200" data-timeframe="W">1W</button>
             </div>
         </div>
-        <div class="relative" style="height: 500px; background-color: var(--trading-bg-dark-navy); border-radius: 8px;">
+        <!-- Chart Toolbar (MT5-like) -->
+        <div class="flex items-center justify-between mb-2 px-2 py-1 bg-gray-800 rounded-t-lg border-b border-gray-700">
+            <div class="flex items-center space-x-2">
+                <button id="chartFullscreen" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Full Screen">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                    </svg>
+                </button>
+                <button id="chartCapture" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Capture Image">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </button>
+                <div class="h-4 w-px bg-gray-600"></div>
+                <button id="chartZoomIn" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Zoom In">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path>
+                    </svg>
+                </button>
+                <button id="chartZoomOut" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Zoom Out">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path>
+                    </svg>
+                </button>
+                <button id="chartResetZoom" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Reset Zoom">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </button>
+                <div class="h-4 w-px bg-gray-600"></div>
+                <button id="chartCrosshair" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors bg-blue-600 text-white" title="Crosshair">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                </button>
+                <button id="chartPan" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Pan">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                </button>
+                <div class="h-4 w-px bg-gray-600"></div>
+                <button id="chartAnalyze" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Analyze">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center space-x-2 text-xs text-gray-400">
+                <span>Scroll to zoom | Drag to pan</span>
+            </div>
+        </div>
+        <div class="relative" style="height: 500px; background-color: var(--trading-bg-dark-navy); border-radius: 0 0 8px 8px;" id="chartContainer">
             <canvas id="xauusdChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Full Screen Chart Modal -->
+    <div id="fullscreenChartModal" class="fixed inset-0 bg-black z-50 hidden flex flex-col">
+        <div class="flex items-center justify-between p-2 bg-gray-900 border-b border-gray-800">
+            <h3 class="text-white font-semibold">XAUUSD Chart - Full Screen</h3>
+            <button id="exitFullscreen" class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="flex-1 relative" id="fullscreenChartContainer">
+            <canvas id="fullscreenChart"></canvas>
         </div>
     </div>
 
@@ -319,67 +385,36 @@
         </div>
     </div>
 
-    <!-- Live Learning Model Dashboard -->
-    <div class="card">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-900">Live Learning Model Dashboard</h2>
-            <div class="flex items-center space-x-2">
-                <div id="modelStatus" class="flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-lg">
-                    <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <span class="text-xs font-medium text-gray-600">Not Connected</span>
-                </div>
-                <button id="toggleModelDashboard" class="btn btn-secondary text-sm">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                    </svg>
-                    Connect
-                </button>
-            </div>
-        </div>
-        
-        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 border-2 border-dashed border-gray-300">
-            <div id="modelDashboardPlaceholder" class="text-center">
-                <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
-                </svg>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Live Model Learning</h3>
-                <p class="text-sm text-gray-600 mb-4">Connect to RLTradingAgent for real-time model training visualization</p>
-                <div class="bg-gray-800 rounded-lg p-4 text-left max-w-2xl mx-auto mb-4">
-                    <code class="text-xs text-green-400 block whitespace-pre-wrap"># Deploy RLTradingAgent
-git clone https://github.com/saeedsamie/RLTradingAgent.git
-cd RLTradingAgent
-pip install -r requirements.txt
-
-# Start training pipeline
-python scripts/run_rl_pipeline.py
-
-# Start dashboard (separate terminal)
-uvicorn web.main_webview:app --reload --port 8001</code>
-                </div>
-                <div class="text-sm text-gray-500">
-                    <p>Dashboard URL: <code class="bg-gray-200 px-2 py-1 rounded">http://localhost:8001/training_dashboard</code></p>
-                </div>
-            </div>
-            
-            <!-- Iframe container (hidden by default) -->
-            <div id="modelDashboard" class="hidden">
-                <iframe src="http://localhost:8001/training_dashboard" 
-                        width="100%" 
-                        height="600px" 
-                        class="border-0 rounded-lg bg-white shadow-lg"
-                        title="Live Model Training Dashboard"
-                        onload="updateModelStatus(true)"
-                        onerror="updateModelStatus(false)">
-                </iframe>
-            </div>
-        </div>
-    </div>
 </div>
+
+@push('styles')
+<style>
+    .timeframe-btn.active,
+    .timeframe-btn.bg-blue-600 {
+        background-color: #2563eb !important;
+        color: white !important;
+    }
+    #chartContainer canvas {
+        cursor: crosshair;
+    }
+    #chartContainer.pan-mode canvas {
+        cursor: grab;
+    }
+    #chartContainer.pan-mode canvas:active {
+        cursor: grabbing;
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Register zoom plugin if available
+    if (typeof zoomPlugin !== 'undefined') {
+        Chart.register(zoomPlugin);
+    }
     const API_BASE_URL = '{{ url("/api") }}';
     const currentPrice = {{ $currentPrice }};
     const entryZones = @json($entryZones);
@@ -789,53 +824,257 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Model Dashboard Toggle
-    document.getElementById('toggleModelDashboard')?.addEventListener('click', function() {
-        const dashboard = document.getElementById('modelDashboard');
-        const placeholder = document.getElementById('modelDashboardPlaceholder');
+    // Full Screen Chart
+    let fullscreenChart = null;
+    
+    document.getElementById('chartFullscreen')?.addEventListener('click', function() {
+        const modal = document.getElementById('fullscreenChartModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
         
-        if (dashboard.classList.contains('hidden')) {
-            dashboard.classList.remove('hidden');
-            placeholder.classList.add('hidden');
-            this.textContent = 'Disconnect';
-            this.classList.remove('btn-secondary');
-            this.classList.add('btn-danger');
-        } else {
-            dashboard.classList.add('hidden');
-            placeholder.classList.remove('hidden');
-            this.textContent = 'Connect';
-            this.classList.remove('btn-danger');
-            this.classList.add('btn-secondary');
+        // Create fullscreen chart
+        setTimeout(() => {
+            const ctx = document.getElementById('fullscreenChart');
+            if (ctx && !fullscreenChart) {
+                // Clone chart data
+                const fullscreenData = {
+                    labels: [...xauusdData.labels],
+                    candles: [...xauusdData.candles],
+                    ema9: [...xauusdData.ema9],
+                    ema21: [...xauusdData.ema21],
+                    ema200: [...xauusdData.ema200]
+                };
+                
+                fullscreenChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: fullscreenData.labels,
+                        datasets: [
+                            {
+                                label: 'Price',
+                                data: fullscreenData.candles.map(c => c.close),
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                backgroundColor: 'transparent',
+                                borderWidth: 1,
+                                pointRadius: 0,
+                                order: 5
+                            },
+                            {
+                                label: 'EMA 9',
+                                data: fullscreenData.ema9,
+                                borderColor: '#FFD600',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.1,
+                                order: 4
+                            },
+                            {
+                                label: 'EMA 21',
+                                data: fullscreenData.ema21,
+                                borderColor: '#00E5FF',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.1,
+                                order: 3
+                            },
+                            {
+                                label: 'EMA 200',
+                                data: fullscreenData.ema200,
+                                borderColor: '#FFFFFF',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.1,
+                                order: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#FFFFFF',
+                                    font: { size: 12 },
+                                    usePointStyle: true,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#FFFFFF',
+                                bodyColor: '#FFFFFF',
+                                borderColor: '#333',
+                                borderWidth: 1
+                            },
+                            zoom: {
+                                zoom: {
+                                    wheel: { enabled: true, speed: 0.1 },
+                                    pinch: { enabled: true },
+                                    mode: 'x'
+                                },
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#FFFFFF',
+                                    font: { size: 11 }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#FFFFFF',
+                                    font: { size: 12 },
+                                    callback: function(value) {
+                                        return '$' + value.toFixed(2);
+                                    }
+                                },
+                                position: 'right'
+                            }
+                        }
+                    },
+                    plugins: [{
+                        id: 'candlestick',
+                        beforeDraw: function(chart) {
+                            const ctx = chart.ctx;
+                            const chartArea = chart.chartArea;
+                            const meta = chart.getDatasetMeta(0);
+                            
+                            ctx.save();
+                            
+                            fullscreenData.candles.forEach((candle, index) => {
+                                if (!meta.data[index]) return;
+                                
+                                const x = meta.data[index].x;
+                                const isBullish = candle.close >= candle.open;
+                                const color = isBullish ? '#00C853' : '#D50000';
+                                const wickColor = 'rgba(255, 255, 255, 0.6)';
+                                
+                                const openY = chart.scales.y.getPixelForValue(candle.open);
+                                const closeY = chart.scales.y.getPixelForValue(candle.close);
+                                const highY = chart.scales.y.getPixelForValue(candle.high);
+                                const lowY = chart.scales.y.getPixelForValue(candle.low);
+                                
+                                const bodyTop = Math.min(openY, closeY);
+                                const bodyBottom = Math.max(openY, closeY);
+                                const bodyHeight = bodyBottom - bodyTop;
+                                const bodyWidth = Math.max(3, (chartArea.right - chartArea.left) / fullscreenData.candles.length * 0.6);
+                                
+                                ctx.strokeStyle = wickColor;
+                                ctx.lineWidth = 1;
+                                ctx.beginPath();
+                                ctx.moveTo(x, highY);
+                                ctx.lineTo(x, lowY);
+                                ctx.stroke();
+                                
+                                ctx.fillStyle = color;
+                                ctx.fillRect(x - bodyWidth / 2, bodyTop, bodyWidth, Math.max(1, bodyHeight));
+                            });
+                            
+                            ctx.restore();
+                        }
+                    }]
+                });
+            }
+        }, 100);
+    });
+    
+    document.getElementById('exitFullscreen')?.addEventListener('click', function() {
+        const modal = document.getElementById('fullscreenChartModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        
+        if (fullscreenChart) {
+            fullscreenChart.destroy();
+            fullscreenChart = null;
         }
     });
     
-    // Update model connection status
-    function updateModelStatus(connected) {
-        const statusEl = document.getElementById('modelStatus');
-        if (!statusEl) return;
+    // Capture Chart Image
+    document.getElementById('chartCapture')?.addEventListener('click', function() {
+        const canvas = document.getElementById('xauusdChart');
+        if (!canvas) return;
         
-        const dot = statusEl.querySelector('div');
-        const text = statusEl.querySelector('span');
-        
-        if (connected) {
-            dot.className = 'w-2 h-2 bg-green-500 rounded-full animate-pulse';
-            text.textContent = 'Connected';
-            text.className = 'text-xs font-medium text-green-600';
-            statusEl.className = 'flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-lg';
-        } else {
-            dot.className = 'w-2 h-2 bg-gray-400 rounded-full';
-            text.textContent = 'Not Connected';
-            text.className = 'text-xs font-medium text-gray-600';
-            statusEl.className = 'flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-lg';
-        }
-    }
+        const link = document.createElement('a');
+        link.download = `XAUUSD_Chart_${currentTimeframe}_${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
     
-    // Check if model dashboard is accessible
-    function checkModelDashboard() {
-        fetch('http://localhost:8001/training_dashboard', { method: 'HEAD', mode: 'no-cors' })
-            .then(() => updateModelStatus(true))
-            .catch(() => updateModelStatus(false));
-    }
+    // Chart Zoom Controls
+    document.getElementById('chartZoomIn')?.addEventListener('click', function() {
+        if (xauusdChart) {
+            const currentZoom = xauusdChart.getZoomLevel();
+            xauusdChart.zoom(1.2);
+        }
+    });
+    
+    document.getElementById('chartZoomOut')?.addEventListener('click', function() {
+        if (xauusdChart) {
+            xauusdChart.zoom(0.8);
+        }
+    });
+    
+    document.getElementById('chartResetZoom')?.addEventListener('click', function() {
+        if (xauusdChart) {
+            xauusdChart.resetZoom();
+        }
+    });
+    
+    // Crosshair Toggle
+    let crosshairEnabled = true;
+    document.getElementById('chartCrosshair')?.addEventListener('click', function() {
+        crosshairEnabled = !crosshairEnabled;
+        this.classList.toggle('active', crosshairEnabled);
+        this.classList.toggle('bg-blue-600', crosshairEnabled);
+    });
+    
+    // Pan Mode Toggle
+    let panMode = false;
+    const chartContainer = document.getElementById('chartContainer');
+    document.getElementById('chartPan')?.addEventListener('click', function() {
+        panMode = !panMode;
+        this.classList.toggle('bg-blue-600', panMode);
+        this.classList.toggle('text-white', panMode);
+        if (chartContainer) {
+            chartContainer.classList.toggle('pan-mode', panMode);
+        }
+        if (xauusdChart && xauusdChart.options.plugins.zoom) {
+            xauusdChart.options.plugins.zoom.pan.enabled = panMode;
+            xauusdChart.update();
+        }
+    });
+    
+    // Analyze Button (opens analysis tools)
+    document.getElementById('chartAnalyze')?.addEventListener('click', function() {
+        // Show analysis menu or tools
+        alert('Analysis tools coming soon! This will include:\n- Trend lines\n- Fibonacci retracements\n- Support/Resistance levels\n- Technical indicators');
+    });
     
     // Load chart data for timeframe
     async function loadChartData(timeframe) {
@@ -1055,6 +1294,26 @@ document.addEventListener('DOMContentLoaded', function() {
                                 return context.dataset.label + ': ' + context.parsed.y.toFixed(2);
                             }
                         }
+                    },
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                                speed: 0.1
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'x'
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'x',
+                            modifierKey: null
+                        },
+                        limits: {
+                            x: { min: 0, max: xauusdData.labels.length }
+                        }
                     }
                 },
                 scales: {
@@ -1203,14 +1462,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     updatePriceLadder(currentPrice);
     updateCountdown();
-    checkModelDashboard();
     loadChartData(currentTimeframe);
     
     // Update every 2 seconds
     setInterval(fetchLivePrice, 2000);
-    
-    // Check model dashboard every 30 seconds
-    setInterval(checkModelDashboard, 30000);
     
     // Add journal entry function
     function addJournalEntry(timestamp, status, message, type = 'info') {
