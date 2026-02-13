@@ -365,6 +365,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const takeProfit1 = {{ $postNewsLow }};
     const takeProfit2 = {{ $postNewsLow - 20 }};
     
+    // QOS WebSocket Configuration
+    const qosEnabled = {{ ($qosEnabled ?? false) ? 'true' : 'false' }};
+    const qosWsUrl = @json($qosWsUrl ?? null);
+    let qosWebSocket = null;
+    let qosConnected = false;
+    
     // Update countdown timer
     function updateCountdown() {
         const timerEl = document.getElementById('countdownTimer');
