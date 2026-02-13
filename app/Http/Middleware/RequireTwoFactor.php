@@ -35,20 +35,3 @@ class RequireTwoFactor
         return $next($request);
     }
 }
-
-        }
-
-        // Skip 2FA check for 2FA routes and logout
-        if ($request->routeIs('auth.two-factor.*') || $request->routeIs('logout')) {
-            return $next($request);
-        }
-
-        // If 2FA is enabled but not verified in this session
-        if ($user->hasTwoFactorEnabled() && !session('two_factor_verified')) {
-            session(['two_factor_required' => true]);
-            return redirect()->route('auth.two-factor.verify');
-        }
-
-        return $next($request);
-    }
-}
