@@ -158,8 +158,10 @@ Route::middleware(['auth', '2fa'])->group(function () {
 Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::get('/users/{id}/details', [AdminController::class, 'getUserDetails'])->name('users.details');
     Route::post('/users/{id}/role', [AdminController::class, 'updateUserRole'])->name('users.update-role');
     Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('users.export');
 });
 
     // API Routes for OANDA Integration

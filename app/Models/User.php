@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -112,5 +113,21 @@ class User extends Authenticatable
     public function getAvatarInitial(): string
     {
         return strtoupper(substr($this->name ?? 'U', 0, 1));
+    }
+
+    /**
+     * Get user's trades
+     */
+    public function trades(): HasMany
+    {
+        return $this->hasMany(Trade::class);
+    }
+
+    /**
+     * Get user's ML models
+     */
+    public function mlModels(): HasMany
+    {
+        return $this->hasMany(MLModel::class);
     }
 }
