@@ -277,24 +277,57 @@
         </div>
     </div>
 
-    <!-- Live Learning Model Dashboard (Optional iframe) -->
+    <!-- Live Learning Model Dashboard -->
     <div class="card">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Live Learning Model Dashboard</h2>
-        <div class="bg-gray-100 rounded-lg p-4 text-center">
-            <p class="text-sm text-gray-600 mb-2">To enable live model learning, deploy RLTradingAgent:</p>
-            <code class="text-xs bg-gray-800 text-green-400 p-2 rounded block text-left">
-                git clone https://github.com/saeedsamie/RLTradingAgent.git<br>
-                cd RLTradingAgent && pip install -r requirements.txt<br>
-                python scripts/run_rl_pipeline.py<br>
-                # Then iframe: http://localhost:8001/training_dashboard
-            </code>
-            <!-- Placeholder for iframe when model is running -->
-            <div id="modelDashboard" class="mt-4 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-900">Live Learning Model Dashboard</h2>
+            <div class="flex items-center space-x-2">
+                <div id="modelStatus" class="flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-lg">
+                    <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                    <span class="text-xs font-medium text-gray-600">Not Connected</span>
+                </div>
+                <button id="toggleModelDashboard" class="btn btn-secondary text-sm">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    Connect
+                </button>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 border-2 border-dashed border-gray-300">
+            <div id="modelDashboardPlaceholder" class="text-center">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Live Model Learning</h3>
+                <p class="text-sm text-gray-600 mb-4">Connect to RLTradingAgent for real-time model training visualization</p>
+                <div class="bg-gray-800 rounded-lg p-4 text-left max-w-2xl mx-auto mb-4">
+                    <code class="text-xs text-green-400 block whitespace-pre-wrap"># Deploy RLTradingAgent
+git clone https://github.com/saeedsamie/RLTradingAgent.git
+cd RLTradingAgent
+pip install -r requirements.txt
+
+# Start training pipeline
+python scripts/run_rl_pipeline.py
+
+# Start dashboard (separate terminal)
+uvicorn web.main_webview:app --reload --port 8001</code>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <p>Dashboard URL: <code class="bg-gray-200 px-2 py-1 rounded">http://localhost:8001/training_dashboard</code></p>
+                </div>
+            </div>
+            
+            <!-- Iframe container (hidden by default) -->
+            <div id="modelDashboard" class="hidden">
                 <iframe src="http://localhost:8001/training_dashboard" 
                         width="100%" 
                         height="600px" 
-                        class="border-0 rounded-lg"
-                        title="Live Model Training Dashboard">
+                        class="border-0 rounded-lg bg-white shadow-lg"
+                        title="Live Model Training Dashboard"
+                        onload="updateModelStatus(true)"
+                        onerror="updateModelStatus(false)">
                 </iframe>
             </div>
         </div>
@@ -386,13 +419,64 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Model Dashboard Toggle
+    document.getElementById('toggleModelDashboard')?.addEventListener('click', function() {
+        const dashboard = document.getElementById('modelDashboard');
+        const placeholder = document.getElementById('modelDashboardPlaceholder');
+        
+        if (dashboard.classList.contains('hidden')) {
+            dashboard.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            this.textContent = 'Disconnect';
+            this.classList.remove('btn-secondary');
+            this.classList.add('btn-danger');
+        } else {
+            dashboard.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            this.textContent = 'Connect';
+            this.classList.remove('btn-danger');
+            this.classList.add('btn-secondary');
+        }
+    });
+    
+    // Update model connection status
+    function updateModelStatus(connected) {
+        const statusEl = document.getElementById('modelStatus');
+        if (!statusEl) return;
+        
+        const dot = statusEl.querySelector('div');
+        const text = statusEl.querySelector('span');
+        
+        if (connected) {
+            dot.className = 'w-2 h-2 bg-green-500 rounded-full animate-pulse';
+            text.textContent = 'Connected';
+            text.className = 'text-xs font-medium text-green-600';
+            statusEl.className = 'flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-lg';
+        } else {
+            dot.className = 'w-2 h-2 bg-gray-400 rounded-full';
+            text.textContent = 'Not Connected';
+            text.className = 'text-xs font-medium text-gray-600';
+            statusEl.className = 'flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-lg';
+        }
+    }
+    
+    // Check if model dashboard is accessible
+    function checkModelDashboard() {
+        fetch('http://localhost:8001/training_dashboard', { method: 'HEAD', mode: 'no-cors' })
+            .then(() => updateModelStatus(true))
+            .catch(() => updateModelStatus(false));
+    }
+    
     // Initialize
     updatePriceLadder(currentPrice);
     updateCountdown();
+    checkModelDashboard();
     
     // Update every 2 seconds
     setInterval(fetchLivePrice, 2000);
-    setInterval(updateCountdown, 1000);
+    
+    // Check model dashboard every 30 seconds
+    setInterval(checkModelDashboard, 30000);
     
     // Add journal entry function
     function addJournalEntry(timestamp, status, message, type = 'info') {

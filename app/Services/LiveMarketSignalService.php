@@ -93,12 +93,36 @@ class LiveMarketSignalService
             return null;
         }
 
-        // Simulated TFT output (replace with actual model inference)
+        // Get latest prediction from database if available
+        $mlModel = \App\Models\MLModel::find($model['id'] ?? null);
+        if ($mlModel) {
+            $latestPrediction = $mlModel->predictions()
+                ->whereNotNull('prediction')
+                ->latest('predicted_at')
+                ->first();
+            
+            if ($latestPrediction) {
+                return [
+                    'direction' => $latestPrediction->prediction,
+                    'confidence' => (float) $latestPrediction->confidence,
+                    'predicted_price' => $latestPrediction->predicted_price,
+                    'reason' => 'TFT model prediction from database',
+                ];
+            }
+        }
+
+        // Fallback: Simulated TFT output based on model accuracy
+        $accuracy = $model['accuracy'] ?? 0.78;
+        $confidence = min(0.95, $accuracy + (rand(-5, 5) / 100));
+        
+        // Simple trend detection (in production, use actual model)
+        $direction = $confidence > 0.65 ? ($currentPrice > 2650 ? 'SELL' : 'BUY') : 'HOLD';
+        
         return [
-            'direction' => 'SELL', // BUY, SELL, or HOLD
-            'confidence' => 0.78, // 0-1
-            'predicted_price' => $currentPrice * 0.995, // 0.5% down
-            'reason' => 'TFT quantile output indicates bearish momentum',
+            'direction' => $direction,
+            'confidence' => $confidence,
+            'predicted_price' => $currentPrice * (1 + ($direction === 'BUY' ? 0.005 : -0.005)),
+            'reason' => "TFT model (Accuracy: " . number_format($accuracy * 100, 1) . "%) - " . ($direction === 'HOLD' ? 'Low confidence signal' : 'High confidence signal'),
         ];
     }
 

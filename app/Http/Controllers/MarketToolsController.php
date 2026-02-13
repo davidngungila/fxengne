@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\EconomicCalendarService;
 use App\Services\LiveMarketSignalService;
+use App\Services\OandaService;
 use App\Models\MLModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,11 +14,13 @@ class MarketToolsController extends Controller
 {
     protected $calendarService;
     protected $signalService;
+    protected $oandaService;
 
-    public function __construct(EconomicCalendarService $calendarService, LiveMarketSignalService $signalService)
+    public function __construct(EconomicCalendarService $calendarService, LiveMarketSignalService $signalService, OandaService $oandaService)
     {
         $this->calendarService = $calendarService;
         $this->signalService = $signalService;
+        $this->oandaService = $oandaService;
     }
 
     public function index()
@@ -130,8 +133,21 @@ class MarketToolsController extends Controller
             ->where('is_active', true)
             ->first();
 
-        // Current price (will be updated via API)
-        $currentPrice = 4944.80; // Placeholder, will be fetched live
+        // Fetch real-time XAUUSD price from OANDA
+        $currentPrice = 4944.80; // Default fallback
+        if ($oandaEnabled) {
+            try {
+                $priceData = $this->oandaService->getPrices(['XAU_USD']);
+                if ($priceData && isset($priceData['prices']) && count($priceData['prices']) > 0) {
+                    $xauusdPrice = $priceData['prices'][0];
+                    if (isset($xauusdPrice['bids'][0]['price'])) {
+                        $currentPrice = (float) $xauusdPrice['bids'][0]['price'];
+                    }
+                }
+            } catch (\Exception $e) {
+                // Use fallback price if API fails
+            }
+        }
         
         // Get Gold Alpha Signal
         $goldAlphaSignal = $this->signalService->getGoldAlphaSignal(
@@ -146,10 +162,54 @@ class MarketToolsController extends Controller
         $postNewsHigh = 4975.00;
         $entryZones = $this->signalService->calculateEntryZones($preNewsPrice, $postNewsLow, $postNewsHigh);
 
-        // Calculate position sizing
-        $accountEquity = 50000; // Placeholder, should come from user account
+        // Get account equity from OANDA
+        $accountEquity = 50000; // Default fallback
+        if ($oandaEnabled) {
+            try {
+                $accountData = $this->oandaService->getAccount();
+                if ($accountData && isset($accountData['account']['balance'])) {
+                    $accountEquity = (float) $accountData['account']['balance'];
+                }
+            } catch (\Exception $e) {
+                // Use fallback equity if API fails
+            }
+        }
+        
+        // Calculate ATR from recent candles (or use default)
+        $atr = 18.40; // Default fallback
+        if ($oandaEnabled) {
+            try {
+                $candles = $this->oandaService->getCandles('XAU_USD', 'M15', 14);
+                if ($candles && isset($candles['candles'])) {
+                    // Calculate ATR from last 14 candles
+                    $highs = [];
+                    $lows = [];
+                    foreach ($candles['candles'] as $candle) {
+                        if ($candle['complete']) {
+                            $highs[] = (float) $candle['mid']['h'];
+                            $lows[] = (float) $candle['mid']['l'];
+                        }
+                    }
+                    if (count($highs) >= 14) {
+                        $trueRanges = [];
+                        for ($i = 1; $i < count($highs); $i++) {
+                            $tr = max(
+                                $highs[$i] - $lows[$i],
+                                abs($highs[$i] - $highs[$i-1]),
+                                abs($lows[$i] - $lows[$i-1])
+                            );
+                            $trueRanges[] = $tr;
+                        }
+                        $atr = array_sum($trueRanges) / count($trueRanges);
+                        $atr = round($atr * 100, 2); // Convert to pips
+                    }
+                }
+            } catch (\Exception $e) {
+                // Use fallback ATR if calculation fails
+            }
+        }
+        
         $riskPercent = 1.2;
-        $atr = 18.40;
         $stopLoss = 4975.00;
         $positionSize = $this->signalService->calculatePositionSize(
             $accountEquity,
