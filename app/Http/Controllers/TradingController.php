@@ -6,6 +6,8 @@ use App\Models\Trade;
 use App\Services\OandaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
+use Carbon\Carbon;
 
 class TradingController extends Controller
 {
@@ -143,5 +145,175 @@ class TradingController extends Controller
     public function manualEntry()
     {
         return view('trading.manual-entry');
+    }
+
+    /**
+     * Export trade history to CSV
+     */
+    public function exportHistory(Request $request)
+    {
+        $userId = Auth::id();
+        
+        // Get filters (same as history method)
+        $dateRange = $request->get('date_range', 'all');
+        $instrument = $request->get('instrument', 'all');
+        $result = $request->get('result', 'all');
+        
+        // Build query (same as history method)
+        $query = Trade::closed()->forUser($userId);
+        
+        // Apply date range filter
+        if ($dateRange === 'today') {
+            $query->whereDate('closed_at', today());
+        } elseif ($dateRange === 'week') {
+            $query->where('closed_at', '>=', now()->startOfWeek());
+        } elseif ($dateRange === 'month') {
+            $query->where('closed_at', '>=', now()->startOfMonth());
+        }
+        
+        // Apply instrument filter
+        if ($instrument !== 'all') {
+            $query->where('instrument', $instrument);
+        }
+        
+        // Apply result filter
+        if ($result === 'win') {
+            $query->where('realized_pl', '>', 0);
+        } elseif ($result === 'loss') {
+            $query->where('realized_pl', '<', 0);
+        }
+        
+        // Get all trades (no pagination for export)
+        $trades = $query->orderBy('closed_at', 'desc')->get();
+        
+        // Generate CSV
+        $filename = 'trade_history_' . Carbon::now()->format('Y-m-d_His') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+        
+        $callback = function() use ($trades) {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for Excel compatibility
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // CSV Headers
+            fputcsv($file, [
+                'Date',
+                'Instrument',
+                'Type',
+                'Units',
+                'Entry Price',
+                'Exit Price',
+                'Stop Loss',
+                'Take Profit',
+                'Duration (minutes)',
+                'Realized P/L',
+                'P/L %',
+                'Strategy',
+                'Close Reason'
+            ]);
+            
+            // CSV Data
+            foreach ($trades as $trade) {
+                $duration = $trade->duration ?? 0;
+                $plPercent = $trade->pl_percentage ?? 0;
+                
+                fputcsv($file, [
+                    $trade->closed_at->format('Y-m-d H:i:s'),
+                    $trade->formatted_instrument,
+                    $trade->type,
+                    number_format($trade->units, 0),
+                    number_format($trade->entry_price, 5),
+                    number_format($trade->exit_price ?? $trade->entry_price, 5),
+                    $trade->stop_loss ? number_format($trade->stop_loss, 5) : '',
+                    $trade->take_profit ? number_format($trade->take_profit, 5) : '',
+                    $duration,
+                    number_format($trade->realized_pl, 2),
+                    number_format($plPercent, 2),
+                    $trade->strategy ?? 'Manual',
+                    $trade->close_reason ?? ''
+                ]);
+            }
+            
+            fclose($file);
+        };
+        
+        return Response::stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export open trades to CSV
+     */
+    public function exportOpenTrades()
+    {
+        $userId = Auth::id();
+        
+        // Get all open trades
+        $trades = Trade::open()
+            ->forUser($userId)
+            ->orderBy('opened_at', 'desc')
+            ->get();
+        
+        // Generate CSV
+        $filename = 'open_trades_' . Carbon::now()->format('Y-m-d_His') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+        
+        $callback = function() use ($trades) {
+            $file = fopen('php://output', 'w');
+            
+            // Add BOM for Excel compatibility
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            
+            // CSV Headers
+            fputcsv($file, [
+                'Opened Date',
+                'Instrument',
+                'Type',
+                'Units',
+                'Entry Price',
+                'Current Price',
+                'Stop Loss',
+                'Take Profit',
+                'Unrealized P/L',
+                'P/L %',
+                'Margin Used',
+                'Strategy',
+                'Duration (minutes)'
+            ]);
+            
+            // CSV Data
+            foreach ($trades as $trade) {
+                $duration = $trade->duration ?? 0;
+                $plPercent = $trade->pl_percentage ?? 0;
+                
+                fputcsv($file, [
+                    $trade->opened_at->format('Y-m-d H:i:s'),
+                    $trade->formatted_instrument,
+                    $trade->type,
+                    number_format($trade->units, 0),
+                    number_format($trade->entry_price, 5),
+                    number_format($trade->current_price ?? $trade->entry_price, 5),
+                    $trade->stop_loss ? number_format($trade->stop_loss, 5) : '',
+                    $trade->take_profit ? number_format($trade->take_profit, 5) : '',
+                    number_format($trade->unrealized_pl, 2),
+                    number_format($plPercent, 2),
+                    number_format($trade->margin_used, 2),
+                    $trade->strategy ?? 'Manual',
+                    $duration
+                ]);
+            }
+            
+            fclose($file);
+        };
+        
+        return Response::stream($callback, 200, $headers);
     }
 }

@@ -29,14 +29,14 @@
 
     <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="card hover:shadow-md transition-shadow">
+        <div class="card hover:shadow-lg transition-all transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Trades</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalTrades">{{ $totalTrades }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1" id="totalTrades">{{ $totalTrades }}</p>
                 </div>
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                     </svg>
                 </div>
@@ -102,6 +102,29 @@
                 <option value="loss" {{ $filters['result'] === 'loss' ? 'selected' : '' }}>Losing</option>
             </select>
             <input type="text" id="searchHistory" placeholder="Search..." class="form-input text-sm flex-1">
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Monthly Performance Chart -->
+        <div class="card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Monthly Performance</h3>
+            </div>
+            <div class="relative" style="height: 300px;">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Instrument Performance -->
+        <div class="card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">By Instrument</h3>
+            </div>
+            <div class="relative" style="height: 300px;">
+                <canvas id="instrumentPerformanceChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -192,10 +215,16 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const API_BASE_URL = '{{ url("/api") }}';
     let tradeHistory = [];
+    let monthlyChart = null;
+    let instrumentChart = null;
+    
+    // Initialize charts
+    initCharts();
 
     async function loadHistory() {
         try {
@@ -205,11 +234,116 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.success) {
                 tradeHistory = result.data?.trades || [];
                 updateStatistics();
+                updateCharts();
                 renderHistory();
             }
         } catch (error) {
             console.error('Error loading history:', error);
         }
+    }
+
+    function initCharts() {
+        // Monthly Performance Chart
+        const monthlyCtx = document.getElementById('monthlyChart');
+        if (monthlyCtx) {
+            monthlyChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Profit/Loss',
+                        data: [],
+                        backgroundColor: function(context) {
+                            return context.parsed.y >= 0 ? '#00C853' : '#D50000';
+                        },
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Instrument Performance Chart
+        const instCtx = document.getElementById('instrumentPerformanceChart');
+        if (instCtx) {
+            instrumentChart = new Chart(instCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Total P/L',
+                        data: [],
+                        backgroundColor: '#2962FF',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function updateCharts() {
+        if (!monthlyChart || !instrumentChart || tradeHistory.length === 0) return;
+        
+        // Monthly Performance
+        const monthlyData = {};
+        tradeHistory.forEach(trade => {
+            if (trade.closeTime || trade.time) {
+                const date = new Date(trade.closeTime || trade.time);
+                const monthKey = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                monthlyData[monthKey] = (monthlyData[monthKey] || 0) + parseFloat(trade.realizedPL || 0);
+            }
+        });
+        
+        const sortedMonths = Object.keys(monthlyData).sort();
+        monthlyChart.data.labels = sortedMonths;
+        monthlyChart.data.datasets[0].data = sortedMonths.map(m => monthlyData[m]);
+        monthlyChart.update('none');
+        
+        // Instrument Performance
+        const instrumentData = {};
+        tradeHistory.forEach(trade => {
+            const inst = (trade.instrument || '').replace('_', '/');
+            instrumentData[inst] = (instrumentData[inst] || 0) + parseFloat(trade.realizedPL || 0);
+        });
+        
+        instrumentChart.data.labels = Object.keys(instrumentData);
+        instrumentChart.data.datasets[0].data = Object.values(instrumentData);
+        instrumentChart.update('none');
     }
 
     function updateStatistics() {
@@ -293,6 +427,42 @@ document.addEventListener('DOMContentLoaded', function() {
         
         window.location.href = '{{ route("trading.history") }}?' + params.toString();
     }
+
+    // Export functionality
+    document.getElementById('exportHistory').addEventListener('click', function() {
+        const btn = this;
+        const originalText = btn.innerHTML;
+        
+        // Disable button and show loading
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Exporting...';
+        
+        // Get current filter values
+        const dateRange = document.getElementById('dateRange').value;
+        const instrument = document.getElementById('filterInstrument').value;
+        const result = document.getElementById('filterResult').value;
+        
+        // Build export URL with filters
+        const params = new URLSearchParams();
+        if (dateRange !== 'all') params.append('date_range', dateRange);
+        if (instrument !== 'all') params.append('instrument', instrument);
+        if (result !== 'all') params.append('result', result);
+        
+        // Create download link
+        const exportUrl = '{{ route("trading.history.export") }}?' + params.toString();
+        const link = document.createElement('a');
+        link.href = exportUrl;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Re-enable button after a short delay
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 1000);
+    });
 
     document.getElementById('dateRange').addEventListener('change', applyFilters);
     document.getElementById('filterInstrument').addEventListener('change', applyFilters);

@@ -18,6 +18,12 @@
                 </svg>
                 Refresh
             </button>
+            <button id="exportOpenTrades" class="btn btn-secondary">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export
+            </button>
             <a href="{{ route('trading.manual-entry') }}" class="btn btn-primary">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -29,59 +35,82 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="card hover:shadow-md transition-shadow">
+        <div class="card hover:shadow-lg transition-all transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Open</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalOpen">{{ $totalOpen }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1" id="totalOpen">{{ $totalOpen }}</p>
                 </div>
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                 </div>
             </div>
         </div>
 
-        <div class="card">
+        <div class="card hover:shadow-lg transition-all transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Unrealized P/L</p>
-                    <p class="text-2xl font-bold mt-1 {{ $unrealizedPL >= 0 ? 'text-green-600' : 'text-red-600' }}" id="unrealizedPL">${{ number_format($unrealizedPL, 2) }}</p>
+                    <p class="text-3xl font-bold mt-1 {{ $unrealizedPL >= 0 ? 'text-green-600' : 'text-red-600' }}" id="unrealizedPL">${{ number_format($unrealizedPL, 2) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
             </div>
         </div>
 
-        <div class="card">
+        <div class="card hover:shadow-lg transition-all transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Total Exposure</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="totalExposure">${{ number_format($totalExposure, 2) }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1" id="totalExposure">${{ number_format($totalExposure, 2) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
                 </div>
             </div>
         </div>
 
-        <div class="card">
+        <div class="card hover:shadow-lg transition-all transform hover:scale-105">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-600">Margin Used</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-1" id="marginUsed">${{ number_format($marginUsed, 2) }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1" id="marginUsed">${{ number_format($marginUsed, 2) }}</p>
                 </div>
-                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- P/L Distribution Chart -->
+        <div class="card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">P/L Distribution</h3>
+            </div>
+            <div class="relative" style="height: 300px;">
+                <canvas id="plDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Instrument Distribution -->
+        <div class="card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">By Instrument</h3>
+            </div>
+            <div class="relative" style="height: 300px;">
+                <canvas id="instrumentChart"></canvas>
             </div>
         </div>
     </div>
@@ -151,11 +180,17 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const API_BASE_URL = '{{ url("/api") }}';
     const CSRF_TOKEN = '{{ csrf_token() }}';
     let openTrades = [];
+    let plChart = null;
+    let instrumentChart = null;
+    
+    // Initialize charts
+    initCharts();
 
     async function loadOpenTrades() {
         try {
@@ -165,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.success) {
                 openTrades = result.data?.trades || [];
                 updateSummary();
+                updateCharts();
                 renderTrades();
             } else {
                 document.getElementById('openTradesTable').innerHTML = `
@@ -278,7 +314,116 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function initCharts() {
+        // P/L Distribution Chart
+        const plCtx = document.getElementById('plDistributionChart');
+        if (plCtx) {
+            plChart = new Chart(plCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Profitable', 'Losing'],
+                    datasets: [{
+                        label: 'Trades',
+                        data: [0, 0],
+                        backgroundColor: ['#00C853', '#D50000'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Instrument Distribution Chart
+        const instCtx = document.getElementById('instrumentChart');
+        if (instCtx) {
+            instrumentChart = new Chart(instCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            '#2962FF', '#00C853', '#FFD600', '#FF6D00', '#D50000', '#9C27B0'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function updateCharts() {
+        if (!plChart || !instrumentChart) return;
+        
+        // Update P/L Distribution
+        const profitable = openTrades.filter(t => parseFloat(t.unrealizedPL || 0) > 0).length;
+        const losing = openTrades.filter(t => parseFloat(t.unrealizedPL || 0) < 0).length;
+        plChart.data.datasets[0].data = [profitable, losing];
+        plChart.update('none');
+        
+        // Update Instrument Distribution
+        const instrumentCounts = {};
+        openTrades.forEach(trade => {
+            const inst = (trade.instrument || '').replace('_', '/');
+            instrumentCounts[inst] = (instrumentCounts[inst] || 0) + 1;
+        });
+        
+        instrumentChart.data.labels = Object.keys(instrumentCounts);
+        instrumentChart.data.datasets[0].data = Object.values(instrumentCounts);
+        instrumentChart.update('none');
+    }
+
     window.closeTrade = closeTrade;
+
+    // Export functionality
+    document.getElementById('exportOpenTrades').addEventListener('click', function() {
+        const btn = this;
+        const originalText = btn.innerHTML;
+        
+        // Disable button and show loading
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Exporting...';
+        
+        // Create download link
+        const exportUrl = '{{ route("trading.open-trades.export") }}';
+        const link = document.createElement('a');
+        link.href = exportUrl;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Re-enable button after a short delay
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 1000);
+    });
 
     document.getElementById('refreshTrades').addEventListener('click', loadOpenTrades);
     document.getElementById('searchTrades').addEventListener('input', function(e) {

@@ -52,7 +52,9 @@ Route::middleware(['auth', '2fa'])->group(function () {
     Route::prefix('trading')->name('trading.')->group(function () {
         Route::get('/', [TradingController::class, 'index'])->name('index');
         Route::get('/open-trades', [TradingController::class, 'openTrades'])->name('open-trades');
+        Route::get('/open-trades/export', [TradingController::class, 'exportOpenTrades'])->name('open-trades.export');
         Route::get('/history', [TradingController::class, 'history'])->name('history');
+        Route::get('/history/export', [TradingController::class, 'exportHistory'])->name('history.export');
         Route::get('/manual-entry', [TradingController::class, 'manualEntry'])->name('manual-entry');
     });
 
