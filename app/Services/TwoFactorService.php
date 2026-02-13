@@ -77,12 +77,25 @@ class TwoFactorService
     {
         $recoveryCodes = $user->getRecoveryCodes();
         
-        if (!in_array($code, $recoveryCodes)) {
+        // Normalize input code (remove dashes and convert to uppercase)
+        $normalizedInput = strtoupper(str_replace('-', '', $code));
+        
+        // Find matching code (with or without dashes)
+        $matchedCode = null;
+        foreach ($recoveryCodes as $storedCode) {
+            $normalizedStored = strtoupper(str_replace('-', '', $storedCode));
+            if ($normalizedInput === $normalizedStored) {
+                $matchedCode = $storedCode;
+                break;
+            }
+        }
+        
+        if (!$matchedCode) {
             return false;
         }
 
         // Remove used recovery code
-        $recoveryCodes = array_values(array_diff($recoveryCodes, [$code]));
+        $recoveryCodes = array_values(array_diff($recoveryCodes, [$matchedCode]));
         $user->two_factor_recovery_codes = $recoveryCodes;
         $user->save();
 
