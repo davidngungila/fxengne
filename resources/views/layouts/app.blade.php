@@ -22,7 +22,7 @@
                 <!-- Logo -->
                 <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
                     <div class="flex items-center space-x-3">
-                        <img src="{{ asset('logo.png') }}" alt="FXEngine Logo" class="h-10 w-10 object-contain">
+                        <img src="{{ asset('/logo.png') }}" alt="FXEngine Logo" class="h-10 w-10 object-contain" onerror="this.style.display='none'">
                         <span class="text-xl font-bold text-gray-900">FXEngine</span>
                     </div>
                     <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700">
@@ -909,7 +909,7 @@
                 <!-- Logo -->
                 <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
                     <div class="flex items-center space-x-3">
-                        <img src="{{ asset('logo.png') }}" alt="FXEngine Logo" class="h-10 w-10 object-contain">
+                        <img src="{{ asset('/logo.png') }}" alt="FXEngine Logo" class="h-10 w-10 object-contain" onerror="this.style.display='none'">
                         <span class="text-xl font-bold text-gray-900">FXEngine</span>
                     </div>
                     <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700">

@@ -53,7 +53,7 @@
                 <!-- Logo -->
                 <div class="text-center mb-8">
                     <div class="inline-flex items-center justify-center mb-4">
-                        <img src="{{ asset('logo.png') }}" alt="FXEngine Logo" class="h-20 w-20 object-contain">
+                        <img src="{{ asset('/logo.png') }}" alt="FXEngine Logo" class="h-20 w-20 object-contain" onerror="this.style.display='none'">
                     </div>
                     <h1 class="text-3xl font-bold text-gray-900">FXEngine</h1>
                     <p class="text-gray-600 mt-2">Sign in to your trading account</p>
