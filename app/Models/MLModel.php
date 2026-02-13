@@ -67,7 +67,7 @@ class MLModel extends Model
      */
     public function predictions(): HasMany
     {
-        return $this->hasMany(MLModelPrediction::class);
+        return $this->hasMany(MLModelPrediction::class, 'ml_model_id');
     }
 
     /**
@@ -75,7 +75,7 @@ class MLModel extends Model
      */
     public function trainingLogs(): HasMany
     {
-        return $this->hasMany(MLModelTrainingLog::class);
+        return $this->hasMany(MLModelTrainingLog::class, 'ml_model_id');
     }
 
     /**

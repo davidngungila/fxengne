@@ -43,7 +43,7 @@ class MLModelPrediction extends Model
      */
     public function mlModel(): BelongsTo
     {
-        return $this->belongsTo(MLModel::class);
+        return $this->belongsTo(MLModel::class, 'ml_model_id');
     }
 }
 
