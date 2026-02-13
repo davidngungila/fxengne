@@ -313,18 +313,64 @@
                     </svg>
                 </button>
                 <div class="h-4 w-px bg-gray-600"></div>
-                <button id="chartAnalyze" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Analyze">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </button>
+                <div class="relative">
+                    <button id="chartAnalyze" class="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors" title="Analysis Tools">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </button>
+                    <!-- Analysis Tools Dropdown -->
+                    <div id="analyzeDropdown" class="hidden absolute right-0 mt-2 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50">
+                        <div class="p-2">
+                            <div class="text-xs text-gray-400 px-3 py-2 border-b border-gray-700">Drawing Tools</div>
+                            <button class="analyze-tool w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded flex items-center space-x-2" data-tool="trendline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17l9.2-9.2M17 8l-9 9m-5-5l9-9m0 0l5 5m-5-5l-5 5"></path>
+                                </svg>
+                                <span>Trend Line</span>
+                            </button>
+                            <button class="analyze-tool w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded flex items-center space-x-2" data-tool="fibonacci">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <span>Fibonacci Retracement</span>
+                            </button>
+                            <button class="analyze-tool w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded flex items-center space-x-2" data-tool="horizontal">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path>
+                                </svg>
+                                <span>Horizontal Line</span>
+                            </button>
+                            <button class="analyze-tool w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded flex items-center space-x-2" data-tool="vertical">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14"></path>
+                                </svg>
+                                <span>Vertical Line</span>
+                            </button>
+                            <button class="analyze-tool w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded flex items-center space-x-2" data-tool="support">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <span>Support/Resistance</span>
+                            </button>
+                            <div class="text-xs text-gray-400 px-3 py-2 border-t border-gray-700 mt-2">Actions</div>
+                            <button class="analyze-tool w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded flex items-center space-x-2" data-tool="clear">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                <span>Clear All Drawings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="flex items-center space-x-2 text-xs text-gray-400">
-                <span>Scroll to zoom | Drag to pan</span>
+                <span>Scroll to zoom | Drag to pan (always enabled)</span>
             </div>
         </div>
         <div class="relative" style="height: 500px; background-color: var(--trading-bg-dark-navy); border-radius: 0 0 8px 8px;" id="chartContainer">
             <canvas id="xauusdChart"></canvas>
+            <svg id="drawingOverlay" class="drawing-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></svg>
         </div>
     </div>
     
@@ -395,13 +441,45 @@
         color: white !important;
     }
     #chartContainer canvas {
-        cursor: crosshair;
-    }
-    #chartContainer.pan-mode canvas {
         cursor: grab;
     }
-    #chartContainer.pan-mode canvas:active {
+    #chartContainer canvas:active {
         cursor: grabbing;
+    }
+    #chartContainer.drawing-mode canvas {
+        cursor: crosshair;
+    }
+    .drawing-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+    }
+    .drawing-overlay.active {
+        pointer-events: all;
+    }
+    .drawing-line {
+        stroke-width: 2;
+        stroke-dasharray: none;
+    }
+    .drawing-line.trendline {
+        stroke: #00E5FF;
+    }
+    .drawing-line.fibonacci {
+        stroke: #FFD600;
+    }
+    .drawing-line.horizontal, .drawing-line.vertical {
+        stroke: #FFFFFF;
+        stroke-dasharray: 5,5;
+    }
+    .drawing-line.support {
+        stroke: #00C853;
+    }
+    .drawing-line.resistance {
+        stroke: #D50000;
     }
 </style>
 @endpush
@@ -1056,27 +1134,225 @@ document.addEventListener('DOMContentLoaded', function() {
         this.classList.toggle('bg-blue-600', crosshairEnabled);
     });
     
-    // Pan Mode Toggle
+    // Pan Mode Toggle (visual indicator only, pan is always enabled)
     let panMode = false;
     const chartContainer = document.getElementById('chartContainer');
     document.getElementById('chartPan')?.addEventListener('click', function() {
         panMode = !panMode;
         this.classList.toggle('bg-blue-600', panMode);
         this.classList.toggle('text-white', panMode);
-        if (chartContainer) {
-            chartContainer.classList.toggle('pan-mode', panMode);
-        }
-        if (xauusdChart && xauusdChart.options.plugins.zoom) {
-            xauusdChart.options.plugins.zoom.pan.enabled = panMode;
-            xauusdChart.update();
+        // Pan is always enabled, this is just a visual indicator
+    });
+    
+    // Drawing Tools
+    let currentDrawingTool = null;
+    let drawings = [];
+    let isDrawing = false;
+    let drawingStart = null;
+    const drawingOverlay = document.getElementById('drawingOverlay');
+    
+    // Analyze Button Dropdown
+    document.getElementById('chartAnalyze')?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dropdown = document.getElementById('analyzeDropdown');
+        dropdown.classList.toggle('hidden');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('analyzeDropdown');
+        const button = document.getElementById('chartAnalyze');
+        if (dropdown && !dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.classList.add('hidden');
         }
     });
     
-    // Analyze Button (opens analysis tools)
-    document.getElementById('chartAnalyze')?.addEventListener('click', function() {
-        // Show analysis menu or tools
-        alert('Analysis tools coming soon! This will include:\n- Trend lines\n- Fibonacci retracements\n- Support/Resistance levels\n- Technical indicators');
+    // Drawing Tool Selection
+    document.querySelectorAll('.analyze-tool').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tool = this.getAttribute('data-tool');
+            
+            if (tool === 'clear') {
+                drawings = [];
+                drawingOverlay.innerHTML = '';
+                currentDrawingTool = null;
+                chartContainer.classList.remove('drawing-mode');
+                document.getElementById('analyzeDropdown').classList.add('hidden');
+                return;
+            }
+            
+            currentDrawingTool = tool;
+            chartContainer.classList.add('drawing-mode');
+            document.getElementById('analyzeDropdown').classList.add('hidden');
+            
+            // Update button states
+            document.querySelectorAll('.analyze-tool').forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white');
+            });
+            this.classList.add('bg-blue-600', 'text-white');
+        });
     });
+    
+    // Drawing on Chart
+    let drawingStartPos = null;
+    const canvas = document.getElementById('xauusdChart');
+    
+    canvas.addEventListener('mousedown', function(e) {
+        if (!currentDrawingTool) return;
+        
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        drawingStartPos = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    });
+    
+    canvas.addEventListener('mousemove', function(e) {
+        if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const currentPos = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+        
+        updateDrawingPreview(drawingStartPos, currentPos);
+    });
+    
+    canvas.addEventListener('mouseup', function(e) {
+        if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const endPos = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+        
+        finishDrawing(drawingStartPos, endPos);
+        isDrawing = false;
+        drawingStartPos = null;
+    });
+    
+    function updateDrawingPreview(start, current) {
+        // Clear preview
+        const preview = drawingOverlay.querySelector('#drawing-preview');
+        if (preview) preview.remove();
+        
+        if (currentDrawingTool === 'trendline') {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.id = 'drawing-preview';
+            line.setAttribute('x1', start.x);
+            line.setAttribute('y1', start.y);
+            line.setAttribute('x2', current.x);
+            line.setAttribute('y2', current.y);
+            line.classList.add('drawing-line', 'trendline');
+            drawingOverlay.appendChild(line);
+        } else if (currentDrawingTool === 'horizontal') {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.id = 'drawing-preview';
+            line.setAttribute('x1', 0);
+            line.setAttribute('y1', start.y);
+            line.setAttribute('x2', drawingOverlay.getAttribute('width') || '100%');
+            line.setAttribute('y2', start.y);
+            line.classList.add('drawing-line', 'horizontal');
+            drawingOverlay.appendChild(line);
+        } else if (currentDrawingTool === 'vertical') {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.id = 'drawing-preview';
+            line.setAttribute('x1', start.x);
+            line.setAttribute('y1', 0);
+            line.setAttribute('x2', start.x);
+            line.setAttribute('y2', drawingOverlay.getAttribute('height') || '100%');
+            line.classList.add('drawing-line', 'vertical');
+            drawingOverlay.appendChild(line);
+        }
+    }
+    
+    function finishDrawing(start, end) {
+        const drawing = {
+            id: Date.now(),
+            tool: currentDrawingTool,
+            start: { ...start },
+            end: { ...end }
+        };
+        
+        drawings.push(drawing);
+        updateDrawingOverlay();
+    }
+    
+    function updateDrawingOverlay() {
+        if (!xauusdChart || !drawingOverlay) return;
+        
+        // Clear existing drawings (except preview)
+        const existing = drawingOverlay.querySelectorAll('line, rect, text');
+        existing.forEach(el => {
+            if (el.id !== 'drawing-preview') el.remove();
+        });
+        
+        // Redraw all drawings
+        drawings.forEach(drawing => {
+            if (drawing.tool === 'trendline') {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', drawing.start.x);
+                line.setAttribute('y1', drawing.start.y);
+                line.setAttribute('x2', drawing.end.x);
+                line.setAttribute('y2', drawing.end.y);
+                line.classList.add('drawing-line', 'trendline');
+                drawingOverlay.appendChild(line);
+            } else if (drawing.tool === 'horizontal') {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', 0);
+                line.setAttribute('y1', drawing.start.y);
+                line.setAttribute('x2', '100%');
+                line.setAttribute('y2', drawing.start.y);
+                line.classList.add('drawing-line', 'horizontal');
+                drawingOverlay.appendChild(line);
+            } else if (drawing.tool === 'vertical') {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', drawing.start.x);
+                line.setAttribute('y1', 0);
+                line.setAttribute('x2', drawing.start.x);
+                line.setAttribute('y2', '100%');
+                line.classList.add('drawing-line', 'vertical');
+                drawingOverlay.appendChild(line);
+            } else if (drawing.tool === 'fibonacci') {
+                // Draw Fibonacci retracement levels
+                const high = Math.min(drawing.start.y, drawing.end.y);
+                const low = Math.max(drawing.start.y, drawing.end.y);
+                const diff = low - high;
+                const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0];
+                
+                levels.forEach(level => {
+                    const y = high + (diff * level);
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', 0);
+                    line.setAttribute('y1', y);
+                    line.setAttribute('x2', '100%');
+                    line.setAttribute('y2', y);
+                    line.classList.add('drawing-line', 'fibonacci');
+                    drawingOverlay.appendChild(line);
+                    
+                    // Add label
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', '10');
+                    text.setAttribute('y', y - 5);
+                    text.setAttribute('fill', '#FFD600');
+                    text.setAttribute('font-size', '10');
+                    text.textContent = (level * 100).toFixed(1) + '%';
+                    drawingOverlay.appendChild(text);
+                });
+            } else if (drawing.tool === 'support') {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', 0);
+                line.setAttribute('y1', drawing.start.y);
+                line.setAttribute('x2', '100%');
+                line.setAttribute('y2', drawing.start.y);
+                line.classList.add('drawing-line', 'support');
+                drawingOverlay.appendChild(line);
+            }
+        });
+    }
     
     // Load chart data for timeframe
     async function loadChartData(timeframe) {
@@ -1311,11 +1587,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         pan: {
                             enabled: true,
                             mode: 'x',
-                            modifierKey: null
+                            modifierKey: null,
+                            threshold: 10
                         },
                         limits: {
                             x: { min: 0, max: xauusdData.labels.length }
                         }
+                    },
+                    onZoomComplete: function({chart}) {
+                        updateDrawingOverlay();
+                    },
+                    onPanComplete: function({chart}) {
+                        updateDrawingOverlay();
                     }
                 },
                 scales: {
