@@ -461,6 +461,9 @@
     .drawing-overlay.active {
         pointer-events: all;
     }
+    .drawing-overlay.active line {
+        pointer-events: none;
+    }
     .drawing-line {
         stroke-width: 2;
         stroke-dasharray: none;
@@ -488,12 +491,29 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
+// Ensure zoom plugin is available globally
+if (typeof zoomPlugin === 'undefined' && typeof window !== 'undefined') {
+    // Try to get from the loaded script
+    window.zoomPlugin = window.zoomPlugin || (typeof zoomPlugin !== 'undefined' ? zoomPlugin : null);
+}
+</script>
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     // Register zoom plugin if available
     if (typeof zoomPlugin !== 'undefined') {
         Chart.register(zoomPlugin);
     } else if (typeof window.ChartZoom !== 'undefined') {
         Chart.register(window.ChartZoom);
+    } else if (typeof Chart !== 'undefined' && Chart.register) {
+        // Try to register from CDN
+        try {
+            const zoomPluginScript = document.querySelector('script[src*="chartjs-plugin-zoom"]');
+            if (zoomPluginScript && window.zoomPlugin) {
+                Chart.register(window.zoomPlugin);
+            }
+        } catch(e) {
+            console.log('Zoom plugin registration:', e);
+        }
     }
     const API_BASE_URL = '{{ url("/api") }}';
     const currentPrice = {{ $currentPrice }};
@@ -1196,43 +1216,54 @@ document.addEventListener('DOMContentLoaded', function() {
     // Drawing on Chart
     let drawingStartPos = null;
     const canvas = document.getElementById('xauusdChart');
+    const chartContainer = document.getElementById('chartContainer');
     
-    canvas.addEventListener('mousedown', function(e) {
-        if (!currentDrawingTool) return;
+    // Only enable drawing when a tool is selected
+    if (chartContainer) {
+        chartContainer.addEventListener('mousedown', function(e) {
+            if (!currentDrawingTool) {
+                // Allow normal pan/zoom when not drawing
+                return;
+            }
+            
+            // Prevent default to allow drawing
+            e.stopPropagation();
+            isDrawing = true;
+            const rect = chartContainer.getBoundingClientRect();
+            drawingStartPos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        });
         
-        isDrawing = true;
-        const rect = canvas.getBoundingClientRect();
-        drawingStartPos = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        };
-    });
-    
-    canvas.addEventListener('mousemove', function(e) {
-        if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
+        chartContainer.addEventListener('mousemove', function(e) {
+            if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
+            
+            e.stopPropagation();
+            const rect = chartContainer.getBoundingClientRect();
+            const currentPos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+            
+            updateDrawingPreview(drawingStartPos, currentPos);
+        });
         
-        const rect = canvas.getBoundingClientRect();
-        const currentPos = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        };
-        
-        updateDrawingPreview(drawingStartPos, currentPos);
-    });
-    
-    canvas.addEventListener('mouseup', function(e) {
-        if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
-        
-        const rect = canvas.getBoundingClientRect();
-        const endPos = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        };
-        
-        finishDrawing(drawingStartPos, endPos);
-        isDrawing = false;
-        drawingStartPos = null;
-    });
+        chartContainer.addEventListener('mouseup', function(e) {
+            if (!isDrawing || !currentDrawingTool || !drawingStartPos) return;
+            
+            e.stopPropagation();
+            const rect = chartContainer.getBoundingClientRect();
+            const endPos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+            
+            finishDrawing(drawingStartPos, endPos);
+            isDrawing = false;
+            drawingStartPos = null;
+        });
+    }
     
     function updateDrawingPreview(start, current) {
         // Clear preview
@@ -1577,28 +1608,28 @@ document.addEventListener('DOMContentLoaded', function() {
                         zoom: {
                             wheel: {
                                 enabled: true,
-                                speed: 0.1
+                                speed: 0.1,
+                                modifierKey: null
                             },
                             pinch: {
                                 enabled: true
                             },
-                            mode: 'x'
+                            mode: 'x',
+                            drag: {
+                                enabled: false
+                            }
                         },
                         pan: {
                             enabled: true,
                             mode: 'x',
                             modifierKey: null,
-                            threshold: 10
+                            threshold: 0,
+                            overScaleMode: 'x'
                         },
                         limits: {
-                            x: { min: 0, max: xauusdData.labels.length }
+                            x: { min: 0, max: xauusdData.labels.length },
+                            y: { min: 'original', max: 'original' }
                         }
-                    },
-                    onZoomComplete: function({chart}) {
-                        updateDrawingOverlay();
-                    },
-                    onPanComplete: function({chart}) {
-                        updateDrawingOverlay();
                     }
                 },
                 scales: {
