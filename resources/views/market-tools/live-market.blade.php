@@ -717,6 +717,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Example: Add entry when price enters zone
     // addJournalEntry('09:25:00', 'ENTRY ZONE', 'Price approaching 50% Fib retracement', 'warning');
+    
+    // Initialize QOS WebSocket if enabled
+    if (qosEnabled) {
+        initQosWebSocket();
+    } else {
+        // Fallback to API polling every 2 seconds
+        setInterval(fetchLivePrice, 2000);
+    }
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (qosWebSocket && qosWebSocket.readyState === WebSocket.OPEN) {
+            const unsubscribeMessage = {
+                action: 'unsubscribe',
+                symbol: 'XAUUSD'
+            };
+            qosWebSocket.send(JSON.stringify(unsubscribeMessage));
+            qosWebSocket.close();
+        }
+    });
 });
 </script>
 @endpush
