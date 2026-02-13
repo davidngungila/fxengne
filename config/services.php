@@ -57,3 +57,24 @@ return [
     ],
 
 ];
+
+        'account_id' => env('OANDA_ACCOUNT_ID'),
+        'environment' => env('OANDA_ENVIRONMENT', 'practice'), // 'practice' or 'live'
+    ],
+
+    'qos' => [
+        'api_key' => env('QOS_API_KEY', 'afe0ac8b33cc43d7f62f318e8e6889ba'),
+        'ws_url' => env('QOS_WS_URL', 'wss://quote.qos.hk/ws'),
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
+    'notifications' => [
+        'email_enabled' => env('NOTIFICATIONS_EMAIL_ENABLED', false),
+        'email_address' => env('NOTIFICATIONS_EMAIL_ADDRESS'),
+    ],
+
+];

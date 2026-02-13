@@ -154,11 +154,3 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '{{ route("analytics.pair-performance") }}?timeframe=' + timeframe;
     });
 
-    // Refresh button
-    document.getElementById('refreshData')?.addEventListener('click', function() {
-        window.location.reload();
-    });
-});
-</script>
-@endpush
-@endsection

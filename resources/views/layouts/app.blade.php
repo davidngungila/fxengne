@@ -21,8 +21,10 @@
             <div class="flex flex-col h-full">
                 <!-- Logo -->
                 <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-                    <div class="flex items-center space-x-3">
-                        <img src="{{ asset('/logo.png') }}" alt="FXEngine Logo" class="h-10 w-10 object-contain" onerror="this.style.display='none'">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">FX</span>
+                        </div>
                         <span class="text-xl font-bold text-gray-900">FXEngine</span>
                     </div>
                     <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700">
@@ -908,8 +910,10 @@
             <div class="flex flex-col h-full">
                 <!-- Logo -->
                 <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-                    <div class="flex items-center space-x-3">
-                        <img src="{{ asset('/logo.png') }}" alt="FXEngine Logo" class="h-10 w-10 object-contain" onerror="this.style.display='none'">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">FX</span>
+                        </div>
                         <span class="text-xl font-bold text-gray-900">FXEngine</span>
                     </div>
                     <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700">

@@ -50,3 +50,28 @@ return new class extends Migration
         Schema::dropIfExists('trades');
     }
 };
+
+            $table->decimal('margin_used', 15, 2)->default(0);
+            $table->string('strategy')->nullable(); // Strategy name (Manual, EMA, RSI, etc.)
+            $table->json('signal_data')->nullable(); // Signal data if from strategy
+            $table->timestamp('opened_at');
+            $table->timestamp('closed_at')->nullable();
+            $table->text('close_reason')->nullable(); // Why trade was closed
+            $table->json('oanda_data')->nullable(); // Full OANDA response data
+            $table->timestamps();
+            
+            $table->index(['user_id', 'state']);
+            $table->index(['instrument', 'state']);
+            $table->index('opened_at');
+            $table->index('closed_at');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('trades');
+    }
+};

@@ -39,3 +39,14 @@ class CheckNotifications extends Command
         return 0;
     }
 }
+
+            $checkerService->runAllChecks();
+            $this->info('Notification check completed successfully.');
+        } catch (\Exception $e) {
+            $this->error('Error checking notifications: ' . $e->getMessage());
+            return 1;
+        }
+
+        return 0;
+    }
+}

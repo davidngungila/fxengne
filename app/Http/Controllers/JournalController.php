@@ -36,3 +36,4 @@ class JournalController extends Controller
 
 
 
+

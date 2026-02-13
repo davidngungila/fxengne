@@ -35,3 +35,13 @@ return new class extends Migration
         Schema::dropIfExists('notifications');
     }
 };
+
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('notifications');
+    }
+};
