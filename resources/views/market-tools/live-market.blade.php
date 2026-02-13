@@ -346,13 +346,53 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update countdown timer
     function updateCountdown() {
-        // This would calculate based on event time
         const timerEl = document.getElementById('countdownTimer');
-        if (timerEl) {
-            // Placeholder - would calculate from server time
-            timerEl.textContent = '{{ $goldAlphaSignal['countdown'] ?? '--:--' }}';
+        if (!timerEl) return;
+        
+        // Get event time from server (if available)
+        const eventTime = @json($cpiEvent ? $cpiEvent['time'] : null);
+        const eventDate = @json($cpiEvent ? ($cpiEvent['date'] instanceof \Carbon\Carbon ? $cpiEvent['date']->format('Y-m-d') : $cpiEvent['date']) : null);
+        
+        if (!eventTime || !eventDate) {
+            timerEl.textContent = '--:--';
+            return;
         }
+        
+        // Parse event time (format: "9:30pm")
+        const timeMatch = eventTime.match(/(\d+):(\d+)(am|pm)/i);
+        if (!timeMatch) {
+            timerEl.textContent = '--:--';
+            return;
+        }
+        
+        let hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const period = timeMatch[3].toLowerCase();
+        
+        if (period === 'pm' && hours < 12) hours += 12;
+        if (period === 'am' && hours === 12) hours = 0;
+        
+        // Create event datetime
+        const eventDateTime = new Date(eventDate + 'T' + String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':00');
+        
+        // Calculate difference
+        const now = new Date();
+        const diff = eventDateTime - now;
+        
+        if (diff <= 0) {
+            timerEl.textContent = '00:00';
+            return;
+        }
+        
+        const totalSeconds = Math.floor(diff / 1000);
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        
+        timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
+    
+    // Update countdown every second
+    setInterval(updateCountdown, 1000);
     
     // Update price ladder
     function updatePriceLadder(price) {
