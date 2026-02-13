@@ -51,8 +51,8 @@
             <div class="bg-white rounded-2xl shadow-xl p-8">
                 <!-- Logo -->
                 <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl mb-4">
-                        <span class="text-white font-bold text-2xl">FX</span>
+                    <div class="inline-flex items-center justify-center mb-4">
+                        <img src="{{ asset('logo.png') }}" alt="FXEngine Logo" class="h-20 w-20 object-contain">
                     </div>
                     <h1 class="text-3xl font-bold text-gray-900">Two-Factor Authentication</h1>
                     <p class="text-gray-600 mt-2">Enter the code from your authenticator app</p>
