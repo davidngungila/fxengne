@@ -356,6 +356,7 @@ uvicorn web.main_webview:app --reload --port 8001</code>
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const API_BASE_URL = '{{ url("/api") }}';
@@ -370,6 +371,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const qosWsUrl = @json($qosWsUrl ?? null);
     let qosWebSocket = null;
     let qosConnected = false;
+    
+    // Chart variables
+    let xauusdChart = null;
+    let xauusdData = {
+        labels: [],
+        candles: [],
+        ema9: [],
+        ema21: [],
+        ema200: []
+    };
     
     // Update countdown timer
     function updateCountdown() {
@@ -466,9 +477,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function updatePrice(newPrice) {
         const priceEl = document.getElementById('xauusdPrice');
         if (priceEl) {
+            const oldPrice = parseFloat(priceEl.textContent.replace('$', '')) || newPrice;
             priceEl.textContent = '$' + newPrice.toFixed(2);
+            
+            // Add price change animation
+            if (newPrice > oldPrice) {
+                priceEl.classList.add('text-green-400');
+                setTimeout(() => priceEl.classList.remove('text-green-400'), 500);
+            } else if (newPrice < oldPrice) {
+                priceEl.classList.add('text-red-400');
+                setTimeout(() => priceEl.classList.remove('text-red-400'), 500);
+            }
         }
         updatePriceLadder(newPrice);
+        
+        // Update chart with tick
+        if (xauusdChart && xauusdData && xauusdData.candles.length > 0) {
+            updateChartWithTick(newPrice);
+        }
     }
     
     // Initialize QOS WebSocket Connection
@@ -527,29 +553,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle QOS data
     function handleQosData(data) {
-        if (data.symbol === 'XAUUSD' || data.symbol === 'XAU/USD' || data.instrument === 'XAUUSD') {
+        if (data.symbol === 'XAUUSD' || data.symbol === 'XAU/USD' || data.instrument === 'XAUUSD' || data.symbol === 'XAU' || data.instrument === 'XAU') {
+            let price = null;
+            
             // Update price from QOS tick data
             if (data.bid && data.ask) {
                 const bid = parseFloat(data.bid);
                 const ask = parseFloat(data.ask);
-                const mid = (bid + ask) / 2;
+                price = (bid + ask) / 2;
                 
-                updatePrice(mid);
+                updatePrice(price);
                 const bidEl = document.getElementById('xauusdBid');
                 const askEl = document.getElementById('xauusdAsk');
                 if (bidEl) bidEl.textContent = '$' + bid.toFixed(2);
                 if (askEl) askEl.textContent = '$' + ask.toFixed(2);
             } else if (data.price) {
-                // Single price update
-                updatePrice(parseFloat(data.price));
+                price = parseFloat(data.price);
+                updatePrice(price);
             } else if (data.last) {
-                // Last price
-                updatePrice(parseFloat(data.last));
+                price = parseFloat(data.last);
+                updatePrice(price);
+            } else if (data.close) {
+                price = parseFloat(data.close);
+                updatePrice(price);
             }
             
-            // Update chart if candle data
-            if (data.type === 'candle' && typeof xauusdChart !== 'undefined') {
-                updateChartWithCandle(data);
+            // Update chart
+            if (price !== null) {
+                if (data.type === 'candle' || (data.open && data.high && data.low && data.close)) {
+                    // Full candle data
+                    updateChartWithCandle(data);
+                } else {
+                    // Tick data - update current candle
+                    updateChartWithTick(price);
+                }
             }
         }
     }
@@ -568,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update chart with new candle
     function updateChartWithCandle(candleData) {
-        if (typeof xauusdChart === 'undefined' || typeof xauusdData === 'undefined') return;
+        if (!xauusdChart || !xauusdData) return;
         
         const newCandle = {
             open: parseFloat(candleData.open || candleData.o),
@@ -581,13 +618,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update last candle or add new one
         if (xauusdData.candles.length > 0) {
             const lastCandle = xauusdData.candles[xauusdData.candles.length - 1];
-            if (lastCandle.time.getTime() === newCandle.time.getTime()) {
+            const lastTime = new Date(lastCandle.time);
+            const newTime = newCandle.time;
+            
+            // Check if same minute (update existing candle)
+            if (lastTime.getFullYear() === newTime.getFullYear() &&
+                lastTime.getMonth() === newTime.getMonth() &&
+                lastTime.getDate() === newTime.getDate() &&
+                lastTime.getHours() === newTime.getHours() &&
+                lastTime.getMinutes() === newTime.getMinutes()) {
                 // Update existing candle
                 Object.assign(lastCandle, newCandle);
             } else {
                 // Add new candle
                 xauusdData.candles.push(newCandle);
-                xauusdData.labels.push(newCandle.time.toLocaleTimeString('en-US', { hour12: false }));
+                xauusdData.labels.push(newCandle.time.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
                 
                 // Keep only last 500 candles
                 if (xauusdData.candles.length > 500) {
@@ -597,15 +642,74 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else {
             xauusdData.candles.push(newCandle);
-            xauusdData.labels.push(newCandle.time.toLocaleTimeString('en-US', { hour12: false }));
+            xauusdData.labels.push(newCandle.time.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
         }
         
-        if (typeof calculateEMAs === 'function') {
+        // Recalculate EMAs
+        calculateEMAs();
+        
+        // Update chart datasets
+        if (xauusdChart.data.datasets.length >= 4) {
+            xauusdChart.data.datasets[0].data = xauusdData.candles.map(c => c.close);
+            xauusdChart.data.datasets[1].data = xauusdData.ema9;
+            xauusdChart.data.datasets[2].data = xauusdData.ema21;
+            xauusdChart.data.datasets[3].data = xauusdData.ema200;
+        }
+        
+        xauusdChart.data.labels = xauusdData.labels;
+        xauusdChart.update('none');
+    }
+    
+    // Update chart with tick price (create/update current candle)
+    function updateChartWithTick(price) {
+        if (!xauusdChart || !xauusdData || xauusdData.candles.length === 0) return;
+        
+        const now = new Date();
+        const lastCandle = xauusdData.candles[xauusdData.candles.length - 1];
+        const lastTime = new Date(lastCandle.time);
+        
+        // Check if same minute
+        if (now.getFullYear() === lastTime.getFullYear() &&
+            now.getMonth() === lastTime.getMonth() &&
+            now.getDate() === lastTime.getDate() &&
+            now.getHours() === lastTime.getHours() &&
+            now.getMinutes() === lastTime.getMinutes()) {
+            // Update current candle
+            lastCandle.close = price;
+            lastCandle.high = Math.max(lastCandle.high, price);
+            lastCandle.low = Math.min(lastCandle.low, price);
+        } else {
+            // Create new candle
+            const newCandle = {
+                open: lastCandle.close,
+                high: price,
+                low: price,
+                close: price,
+                time: now
+            };
+            xauusdData.candles.push(newCandle);
+            xauusdData.labels.push(now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
+            
+            // Keep only last 500 candles
+            if (xauusdData.candles.length > 500) {
+                xauusdData.candles.shift();
+                xauusdData.labels.shift();
+            }
+            
+            // Recalculate EMAs
             calculateEMAs();
         }
-        if (xauusdChart) {
-            xauusdChart.update('none');
+        
+        // Update chart
+        if (xauusdChart.data.datasets.length >= 4) {
+            xauusdChart.data.datasets[0].data = xauusdData.candles.map(c => c.close);
+            xauusdChart.data.datasets[1].data = xauusdData.ema9;
+            xauusdChart.data.datasets[2].data = xauusdData.ema21;
+            xauusdChart.data.datasets[3].data = xauusdData.ema200;
         }
+        
+        xauusdChart.data.labels = xauusdData.labels;
+        xauusdChart.update('none');
     }
 
     // Fetch live XAUUSD price (fallback if QOS not available)
@@ -676,10 +780,251 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(() => updateModelStatus(false));
     }
     
+    // Initialize XAUUSD Chart
+    function initXAUUSDChart() {
+        const ctx = document.getElementById('xauusdChart');
+        if (!ctx) return;
+        
+        // Generate initial sample data (last 100 candles)
+        const now = new Date();
+        const initialCandles = [];
+        const initialLabels = [];
+        let basePrice = currentPrice;
+        
+        for (let i = 99; i >= 0; i--) {
+            const time = new Date(now.getTime() - i * 60000); // 1 minute candles
+            const change = (Math.random() - 0.5) * 2; // Random price movement
+            const open = basePrice;
+            const close = basePrice + change;
+            const high = Math.max(open, close) + Math.random() * 0.5;
+            const low = Math.min(open, close) - Math.random() * 0.5;
+            
+            initialCandles.push({ open, high, low, close, time });
+            initialLabels.push(time.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
+            basePrice = close;
+        }
+        
+        xauusdData.candles = initialCandles;
+        xauusdData.labels = initialLabels;
+        
+        // Calculate EMAs
+        calculateEMAs();
+        
+        // Create datasets
+        const datasets = [
+            // Price line (for reference)
+            {
+                label: 'Price',
+                data: initialCandles.map(c => c.close),
+                borderColor: 'rgba(255, 255, 255, 0.3)',
+                backgroundColor: 'transparent',
+                borderWidth: 1,
+                pointRadius: 0,
+                order: 5
+            },
+            // EMA 9
+            {
+                label: 'EMA 9',
+                data: xauusdData.ema9,
+                borderColor: '#FFD600',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.1,
+                order: 4
+            },
+            // EMA 21
+            {
+                label: 'EMA 21',
+                data: xauusdData.ema21,
+                borderColor: '#00E5FF',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.1,
+                order: 3
+            },
+            // EMA 200
+            {
+                label: 'EMA 200',
+                data: xauusdData.ema200,
+                borderColor: '#FFFFFF',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.1,
+                order: 2
+            }
+        ];
+        
+        xauusdChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: initialLabels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#FFFFFF',
+                            font: { size: 11 },
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#FFFFFF',
+                        bodyColor: '#FFFFFF',
+                        borderColor: '#333',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const index = context.dataIndex;
+                                const candle = xauusdData.candles[index];
+                                if (!candle) return context.dataset.label + ': ' + context.parsed.y.toFixed(2);
+                                
+                                if (context.datasetIndex === 0) {
+                                    return [
+                                        'O: ' + candle.open.toFixed(2),
+                                        'H: ' + candle.high.toFixed(2),
+                                        'L: ' + candle.low.toFixed(2),
+                                        'C: ' + candle.close.toFixed(2)
+                                    ];
+                                }
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#FFFFFF',
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#FFFFFF',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return '$' + value.toFixed(2);
+                            }
+                        },
+                        position: 'right'
+                    }
+                }
+            },
+            plugins: [{
+                id: 'candlestick',
+                beforeDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const chartArea = chart.chartArea;
+                    const meta = chart.getDatasetMeta(0);
+                    
+                    ctx.save();
+                    
+                    xauusdData.candles.forEach((candle, index) => {
+                        if (!meta.data[index]) return;
+                        
+                        const x = meta.data[index].x;
+                        const isBullish = candle.close >= candle.open;
+                        const color = isBullish ? '#00C853' : '#D50000';
+                        const wickColor = 'rgba(255, 255, 255, 0.6)';
+                        
+                        const openY = chart.scales.y.getPixelForValue(candle.open);
+                        const closeY = chart.scales.y.getPixelForValue(candle.close);
+                        const highY = chart.scales.y.getPixelForValue(candle.high);
+                        const lowY = chart.scales.y.getPixelForValue(candle.low);
+                        
+                        const bodyTop = Math.min(openY, closeY);
+                        const bodyBottom = Math.max(openY, closeY);
+                        const bodyHeight = bodyBottom - bodyTop;
+                        const bodyWidth = Math.max(3, (chartArea.right - chartArea.left) / xauusdData.candles.length * 0.6);
+                        
+                        // Draw wick
+                        ctx.strokeStyle = wickColor;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(x, highY);
+                        ctx.lineTo(x, lowY);
+                        ctx.stroke();
+                        
+                        // Draw body
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x - bodyWidth / 2, bodyTop, bodyWidth, Math.max(1, bodyHeight));
+                    });
+                    
+                    ctx.restore();
+                }
+            }]
+        });
+    }
+    
+    // Calculate EMAs
+    function calculateEMAs() {
+        const closes = xauusdData.candles.map(c => c.close);
+        
+        // EMA 9
+        xauusdData.ema9 = calculateEMA(closes, 9);
+        
+        // EMA 21
+        xauusdData.ema21 = calculateEMA(closes, 21);
+        
+        // EMA 200
+        xauusdData.ema200 = calculateEMA(closes, 200);
+    }
+    
+    // Calculate EMA helper
+    function calculateEMA(data, period) {
+        const multiplier = 2 / (period + 1);
+        const ema = [];
+        let sum = 0;
+        
+        for (let i = 0; i < data.length; i++) {
+            if (i < period) {
+                sum += data[i];
+                if (i === period - 1) {
+                    ema.push(sum / period);
+                } else {
+                    ema.push(null);
+                }
+            } else {
+                ema.push((data[i] - ema[ema.length - 1]) * multiplier + ema[ema.length - 1]);
+            }
+        }
+        
+        return ema;
+    }
+    
     // Initialize
     updatePriceLadder(currentPrice);
     updateCountdown();
     checkModelDashboard();
+    initXAUUSDChart();
     
     // Update every 2 seconds
     setInterval(fetchLivePrice, 2000);

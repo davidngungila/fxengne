@@ -149,3 +149,4 @@ The badge styles automatically use the professional trading colors:
 
 
 
+
