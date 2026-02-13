@@ -64,7 +64,9 @@ class LiveMarketSignalService
                 $baseSignal['confidence'] = $eventSignal['confidence'] * 100;
             }
 
-            $baseSignal['reason'] = "TFT: {$tftSignal['direction']} ({$tftSignal['confidence']*100}%) + Event: {$eventSignal['signal']} ({$eventSignal['confidence']*100}%)";
+            $tftConf = $tftSignal['confidence'] * 100;
+            $eventConf = $eventSignal['confidence'] * 100;
+            $baseSignal['reason'] = "TFT: {$tftSignal['direction']} ({$tftConf}%) + Event: {$eventSignal['signal']} ({$eventConf}%)";
         } elseif ($tftSignal) {
             // Only TFT model
             $baseSignal['direction'] = $tftSignal['direction'];
