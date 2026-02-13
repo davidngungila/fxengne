@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\MarketDataController;
 use App\Http\Controllers\Api\TradeController;
 use App\Http\Controllers\AutomatedTradingController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\MLModelController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -64,6 +65,17 @@ Route::middleware(['auth', '2fa'])->group(function () {
         Route::get('/create', [StrategyController::class, 'create'])->name('create');
         Route::get('/backtesting', [StrategyController::class, 'backtesting'])->name('backtesting');
         Route::get('/performance', [StrategyController::class, 'performance'])->name('performance');
+    });
+
+    // ML Models
+    Route::prefix('ml-models')->name('ml-models.')->group(function () {
+        Route::get('/', [MLModelController::class, 'index'])->name('index');
+        Route::get('/create', [MLModelController::class, 'create'])->name('create');
+        Route::post('/', [MLModelController::class, 'store'])->name('store');
+        Route::get('/{mlModel}', [MLModelController::class, 'show'])->name('show');
+        Route::post('/{mlModel}/train', [MLModelController::class, 'startTraining'])->name('train');
+        Route::post('/{mlModel}/toggle-active', [MLModelController::class, 'toggleActive'])->name('toggle-active');
+        Route::delete('/{mlModel}', [MLModelController::class, 'destroy'])->name('destroy');
     });
 
     // Risk Management
